@@ -1,6 +1,8 @@
 #![forbid(unsafe_code)]
 #![doc = "Core domain for the educational agent harness."]
 
+use std::fmt;
+
 /// Marks the repository state while Chapter 0 is under construction.
 pub const SCAFFOLD_STATUS: &str = "chapter-0-red-2";
 
@@ -78,6 +80,14 @@ impl TurnOutcome {
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum RunTurnError {
     BlankPrompt,
+}
+
+impl fmt::Display for RunTurnError {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::BlankPrompt => formatter.write_str("prompt must not be blank"),
+        }
+    }
 }
 
 /// Runs one turn. Chapter 0 intentionally starts with an incomplete Red state.
