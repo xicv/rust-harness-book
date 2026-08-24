@@ -1,0 +1,28 @@
+id = "ch00"
+title_zh = "先跑通一个回合"
+title_en = "Run One Complete Turn"
+status = "ready-to-write"
+
+[rust]
+concepts = ["functions", "values", "enums", "integration tests"]
+
+[engineering]
+principles = ["primitive whole", "observable behaviour", "functional core"]
+
+[harness]
+adds = ["offline echo turn", "typed lifecycle events", "CLI smoke flow"]
+
+[research]
+codex_paths = [
+    "codex-rs/app-server/README.md",
+    "codex-rs/core/src/codex_thread.rs",
+]
+
+[verification]
+offline = true
+required_tests = [
+    "one_prompt_produces_ordered_events",
+    "blank_prompt_is_rejected_before_turn_start",
+    "completed_event_reuses_thread_and_turn_ids",
+    "cli_prints_ordered_events",
+]
