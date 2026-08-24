@@ -284,7 +284,6 @@ def check_action_pins() -> None:
     expected = {
         "actions/checkout": actions.get("checkout"),
         "dtolnay/rust-toolchain": actions.get("rust_toolchain"),
-        "peaceiris/actions-mdbook": actions.get("mdbook"),
         "typst-community/setup-typst": actions.get("typst"),
     }
     for name, sha in expected.items():
