@@ -26,7 +26,7 @@ license = "Apache-2.0"
 [github_actions]
 checkout = "3d3c42e5aac5ba805825da76410c181273ba90b1"
 rust_toolchain = "6c977a6ca4077a0ceb28ffbe03f59d46e9ac8772"
-typst = "c70fa75fa4af2546f1c4bca71eb439a5c2f01bf1"
+typst = "48aeee7543d37f01afd1ffb27307dc277387ba13"
 
 [[reference_book]]
 id = "dive-into-rust-2018"
