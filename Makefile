@@ -4,13 +4,13 @@ scaffold-check:
 	python3 scripts/check_scaffold.py
 
 check:
-	cargo check --workspace
+	cargo check --workspace --locked
 
 test:
-	cargo test --workspace
+	cargo test --workspace --locked
 
 lint:
-	cargo clippy --workspace --all-targets -- -D warnings
+	cargo clippy --workspace --all-targets --locked -- -D warnings
 
 fmt-check:
 	cargo fmt --all -- --check
