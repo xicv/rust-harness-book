@@ -1,11 +1,14 @@
 use std::error::Error;
+use std::path::Path;
 use std::process::Command;
 
 // ANCHOR: ch01_doctor_test
 #[test]
 fn doctor_reports_pinned_and_active_toolchain() -> Result<(), Box<dyn Error>> {
+    let workspace_root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
     let output = Command::new(env!("CARGO_BIN_EXE_harness-cli"))
         .arg("--doctor")
+        .current_dir(workspace_root)
         .output()?;
 
     assert!(
