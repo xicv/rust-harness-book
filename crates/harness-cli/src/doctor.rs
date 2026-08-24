@@ -93,7 +93,10 @@ impl fmt::Display for DoctorError {
                 write!(formatter, "{program} --version returned non-UTF-8 output")
             }
             Self::InvalidVersionOutput(program) => {
-                write!(formatter, "{program} --version returned an unexpected format")
+                write!(
+                    formatter,
+                    "{program} --version returned an unexpected format"
+                )
             }
         }
     }
@@ -104,9 +107,7 @@ impl Error for DoctorError {
         match self {
             Self::CommandIo { source, .. } => Some(source),
             Self::InvalidUtf8 { source, .. } => Some(source),
-            Self::MissingValue(_)
-            | Self::CommandFailed(_)
-            | Self::InvalidVersionOutput(_) => None,
+            Self::MissingValue(_) | Self::CommandFailed(_) | Self::InvalidVersionOutput(_) => None,
         }
     }
 }
