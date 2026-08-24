@@ -34,6 +34,11 @@ A chapter is complete only when:
 - source paths and pins are recorded;
 - differences from Codex are explicit;
 - security, performance, and portability limits are stated;
-- HTML and PDF source build cleanly;
+- HTML source and the current PDF pipeline build cleanly;
+- PDF content parity is recorded separately until `book-render` exists;
 - no unrelated formatting changes exist;
 - an evidence receipt is produced.
+
+A successful Typst smoke build does not mean the chapter prose is already in the
+PDF. Until `book-render` exists, completed chapter receipts must state
+`pdf_content_parity = "pending-book-render"`.

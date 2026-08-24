@@ -1,7 +1,7 @@
 id = "ch00"
 title_zh = "先跑通一个回合"
 title_en = "Run One Complete Turn"
-status = "ready-to-write"
+status = "completed"
 
 [rust]
 concepts = ["functions", "values", "enums", "integration tests"]

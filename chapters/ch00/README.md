@@ -1,12 +1,15 @@
-# Chapter 0 planning packet
+# Chapter 0 evidence packet
 
 Chapter title: **先跑通一个回合 / Run One Complete Turn**
+
+Status: **completed**
 
 Files:
 
 - `chapter.toml` — machine-readable scope
-- `acceptance.md` — expected observable behaviour
-- `red-test.md` — the first test to write
+- `acceptance.md` — observable behaviour
+- `red-test.md` — Red 1 and Red 2 plan plus observed evidence
+- `receipt.toml` — completed verification receipt
 
-Do not create a solution patch until the Red test has been observed failing for
-the intended reason.
+The implementation is the first real vertical slice of the cumulative harness.
+It remains synchronous, offline, deterministic, and standard-library-only.

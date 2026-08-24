@@ -1,13 +1,77 @@
 schema_version = 1
 
-# Every displayed Rust example will be registered here.
-# Chapter 0 adds the first entries.
-#
-# [[example]]
-# id = "ch00-one-prompt-ordered-events"
-# chapter = "ch00"
-# kind = "integration"
-# source = "crates/harness-core/tests/turn_flow.rs"
-# test = "one_prompt_produces_ordered_events"
-# command = ["cargo", "test", "-p", "harness-core", "--test", "turn_flow"]
-# offline = true
+[[example]]
+id = "ch00-domain-types"
+chapter = "ch00"
+kind = "compile-only"
+source = "crates/harness-core/src/lib.rs"
+anchor = "ch00_domain_types"
+command = ["cargo", "check", "-p", "harness-core", "--locked"]
+offline = true
+
+[[example]]
+id = "ch00-run-turn"
+chapter = "ch00"
+kind = "integration"
+source = "crates/harness-core/src/lib.rs"
+anchor = "ch00_run_turn"
+command = ["cargo", "test", "-p", "harness-core", "--test", "turn_flow", "--locked"]
+offline = true
+
+[[example]]
+id = "ch00-ordered-events"
+chapter = "ch00"
+kind = "integration"
+source = "crates/harness-core/tests/turn_flow.rs"
+anchor = "ch00_ordered_events_test"
+test = "one_prompt_produces_ordered_events"
+command = ["cargo", "test", "-p", "harness-core", "--test", "turn_flow", "--locked", "one_prompt_produces_ordered_events"]
+offline = true
+
+[[example]]
+id = "ch00-blank-prompt"
+chapter = "ch00"
+kind = "integration"
+source = "crates/harness-core/tests/turn_flow.rs"
+anchor = "ch00_blank_prompt_test"
+test = "blank_prompt_is_rejected_before_turn_start"
+command = ["cargo", "test", "-p", "harness-core", "--test", "turn_flow", "--locked", "blank_prompt_is_rejected_before_turn_start"]
+offline = true
+
+[[example]]
+id = "ch00-render-event"
+chapter = "ch00"
+kind = "compile-only"
+source = "crates/harness-cli/src/render.rs"
+anchor = "ch00_render_event"
+command = ["cargo", "check", "-p", "harness-cli", "--locked"]
+offline = true
+
+[[example]]
+id = "ch00-cli"
+chapter = "ch00"
+kind = "black-box"
+source = "crates/harness-cli/tests/cli.rs"
+anchor = "ch00_cli_test"
+test = "cli_prints_ordered_events"
+command = ["cargo", "test", "-p", "harness-cli", "--test", "cli", "--locked", "cli_prints_ordered_events"]
+offline = true
+
+[[example]]
+id = "ch01-toolchain-report"
+chapter = "ch01"
+kind = "black-box-support"
+source = "crates/harness-cli/src/doctor.rs"
+anchor = "ch01_toolchain_report"
+command = ["cargo", "test", "-p", "harness-cli", "--test", "doctor", "--locked"]
+offline = true
+
+[[example]]
+id = "ch01-doctor-test"
+chapter = "ch01"
+kind = "black-box"
+source = "crates/harness-cli/tests/doctor.rs"
+anchor = "ch01_doctor_test"
+test = "doctor_reports_pinned_and_active_toolchain"
+command = ["cargo", "test", "-p", "harness-cli", "--test", "doctor", "--locked", "doctor_reports_pinned_and_active_toolchain"]
+offline = true
