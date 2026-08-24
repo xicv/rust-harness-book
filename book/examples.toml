@@ -1,0 +1,13 @@
+schema_version = 1
+
+# Every displayed Rust example will be registered here.
+# Chapter 0 adds the first entries.
+#
+# [[example]]
+# id = "ch00-one-prompt-ordered-events"
+# chapter = "ch00"
+# kind = "integration"
+# source = "crates/harness-core/tests/turn_flow.rs"
+# test = "one_prompt_produces_ordered_events"
+# command = ["cargo", "test", "-p", "harness-core", "--test", "turn_flow"]
+# offline = true

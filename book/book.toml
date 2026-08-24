@@ -1,0 +1,44 @@
+[book]
+title = "Rust 设计与实战：从零构建可验证的智能体 Harness"
+authors = ["xicv and contributors"]
+description = "A why-first, TDD-driven Rust book that builds a real agent harness."
+language = "zh-CN"
+src = "src"
+
+[rust]
+edition = "2024"
+
+[build]
+build-dir = "../dist/html"
+create-missing = false
+
+[output.html]
+default-theme = "light"
+preferred-dark-theme = "navy"
+smart-punctuation = true
+definition-lists = true
+admonitions = true
+additional-css = ["theme/cards.css"]
+no-section-label = false
+sidebar-header-nav = true
+git-repository-url = "https://github.com/xicv/rust-harness-book"
+edit-url-template = "https://github.com/xicv/rust-harness-book/edit/main/book/src/{path}"
+
+[output.html.playground]
+editable = false
+copyable = true
+copy-js = true
+line-numbers = false
+runnable = true
+
+[output.html.search]
+enable = true
+limit-results = 30
+teaser-word-count = 24
+use-boolean-and = true
+expand = true
+heading-split-level = 3
+
+[output.html.print]
+enable = true
+page-break = true

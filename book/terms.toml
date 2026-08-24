@@ -1,0 +1,118 @@
+schema_version = 1
+
+[[term]]
+id = "agent-harness"
+zh = "智能体运行框架"
+en = "Agent Harness"
+introduced_in = "ch00"
+note = "The shorter word Harness may remain in titles and code-facing names."
+
+[[term]]
+id = "thread"
+zh = "会话"
+en = "Thread"
+introduced_in = "ch00"
+note = "A Codex conversation container, not an operating-system thread."
+
+[[term]]
+id = "turn"
+zh = "回合"
+en = "Turn"
+introduced_in = "ch00"
+
+[[term]]
+id = "item"
+zh = "条目"
+en = "Item"
+introduced_in = "ch00"
+
+[[term]]
+id = "event"
+zh = "事件"
+en = "Event"
+introduced_in = "ch00"
+
+[[term]]
+id = "test-driven-development"
+zh = "测试驱动开发"
+en = "Test-Driven Development (TDD)"
+introduced_in = "ch02"
+
+[[term]]
+id = "ownership"
+zh = "所有权"
+en = "Ownership"
+introduced_in = "ch09"
+
+[[term]]
+id = "borrowing"
+zh = "借用"
+en = "Borrowing"
+introduced_in = "ch10"
+
+[[term]]
+id = "lifetime"
+zh = "生命周期"
+en = "Lifetime"
+introduced_in = "ch10"
+
+[[term]]
+id = "trait"
+zh = "特征"
+en = "Trait"
+introduced_in = "ch15"
+note = "Keep the English word visible because Rust code and diagnostics use it."
+
+[[term]]
+id = "model-provider"
+zh = "模型提供者"
+en = "Model Provider"
+introduced_in = "ch15"
+
+[[term]]
+id = "tool-call"
+zh = "工具调用"
+en = "Tool Call"
+introduced_in = "ch22"
+
+[[term]]
+id = "backpressure"
+zh = "背压"
+en = "Backpressure"
+introduced_in = "ch21"
+
+[[term]]
+id = "os-thread"
+zh = "操作系统线程"
+en = "OS Thread"
+introduced_in = "ch24"
+
+[[term]]
+id = "approval"
+zh = "审批"
+en = "Approval"
+introduced_in = "ch26"
+
+[[term]]
+id = "sandbox"
+zh = "沙箱"
+en = "Sandbox"
+introduced_in = "ch27"
+
+[[term]]
+id = "replay"
+zh = "重放"
+en = "Replay"
+introduced_in = "ch28"
+
+[[term]]
+id = "idempotency"
+zh = "幂等性"
+en = "Idempotency"
+introduced_in = "ch29"
+
+[[term]]
+id = "evaluation"
+zh = "评测"
+en = "Evaluation"
+introduced_in = "ch34"

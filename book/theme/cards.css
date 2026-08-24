@@ -1,0 +1,63 @@
+:root {
+  --card-border: color-mix(in srgb, currentColor 18%, transparent);
+  --card-surface: color-mix(in srgb, currentColor 4%, transparent);
+  --card-accent: color-mix(in srgb, currentColor 65%, transparent);
+}
+
+.learning-card {
+  border: 1px solid var(--card-border);
+  border-radius: 0.9rem;
+  background: var(--card-surface);
+  margin: 1rem 0;
+  padding: 1rem;
+}
+
+.learning-card > :first-child {
+  margin-top: 0;
+}
+
+.learning-card > :last-child {
+  margin-bottom: 0;
+}
+
+.term-en {
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.88em;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+  margin-inline-start: 0.25em;
+}
+
+.card-label {
+  border-inline-start: 0.25rem solid var(--card-accent);
+  font-weight: 700;
+  padding-inline-start: 0.6rem;
+}
+
+.evidence-list code,
+.learning-card code {
+  overflow-wrap: anywhere;
+}
+
+pre {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+@media (max-width: 48rem) {
+  .content {
+    padding-inline: 1rem;
+  }
+
+  .learning-card {
+    border-radius: 0.75rem;
+    padding: 0.85rem;
+  }
+}
+
+@media print {
+  .learning-card {
+    break-inside: avoid;
+    background: transparent;
+  }
+}

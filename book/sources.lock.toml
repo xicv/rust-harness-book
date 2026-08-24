@@ -1,0 +1,50 @@
+schema_version = 1
+reviewed_at = "2026-08-24"
+
+[rust]
+toolchain = "1.98.0"
+edition = "2024"
+resolver = "3"
+release_notes = "https://blog.rust-lang.org/2026/08/20/Rust-1.98.0/"
+
+[mdbook]
+version = "0.5.4"
+docs = "https://rust-lang.github.io/mdBook/"
+role = "production HTML and executable Rust examples"
+
+[typst]
+version = "0.15.1"
+docs = "https://typst.app/docs/"
+role = "PDF typesetting"
+
+[codex]
+repository = "https://github.com/openai/codex"
+commit = "2df67054232090af8d2fa197c46b994bc2b0dda1"
+license = "Apache-2.0"
+
+[github_actions]
+checkout = "3d3c42e5aac5ba805825da76410c181273ba90b1"
+rust_toolchain = "6c977a6ca4077a0ceb28ffbe03f59d46e9ac8772"
+mdbook = "a6f333f62c4b46ed5190d00cab3b7f9a6996274c"
+typst = "c70fa75fa4af2546f1c4bca71eb439a5c2f01bf1"
+
+[[reference_book]]
+id = "dive-into-rust-2018"
+title = "深入浅出 Rust"
+author = "范长春"
+source = "user-supplied reference copy"
+use = "teaching-method and topic-gap analysis only"
+rights = "copyrighted; do not copy prose, diagrams, or exercises"
+
+[[reference_book]]
+id = "rust-first-class-2021"
+title = "Rust 编程第一课"
+author = "陈天"
+source = "user-supplied reference copy"
+use = "learning-method, project progression, and engineering-principle analysis only"
+rights = "reference only; do not copy prose, diagrams, or exercises"
+
+[[architecture_reference]]
+id = "codex-app-server"
+url = "https://developers.openai.com/codex/app-server"
+role = "public thread, turn, item, and lifecycle concepts"
