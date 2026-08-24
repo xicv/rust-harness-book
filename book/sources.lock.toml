@@ -11,6 +11,7 @@ release_notes = "https://blog.rust-lang.org/2026/08/20/Rust-1.98.0/"
 version = "0.5.4"
 docs = "https://rust-lang.github.io/mdBook/"
 role = "production HTML and executable Rust examples"
+binary_sha256_x86_64_unknown_linux_gnu = "3f28de05dafca9d0f2eab99c662116b0e37b89b1d96a08f8f430b9eeae958cd7"
 
 [typst]
 version = "0.15.1"
@@ -25,8 +26,7 @@ license = "Apache-2.0"
 [github_actions]
 checkout = "3d3c42e5aac5ba805825da76410c181273ba90b1"
 rust_toolchain = "6c977a6ca4077a0ceb28ffbe03f59d46e9ac8772"
-mdbook = "a6f333f62c4b46ed5190d00cab3b7f9a6996274c"
-typst = "c70fa75fa4af2546f1c4bca71eb439a5c2f01bf1"
+typst = "48aeee7543d37f01afd1ffb27307dc277387ba13"
 
 [[reference_book]]
 id = "dive-into-rust-2018"
