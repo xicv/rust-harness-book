@@ -1,0 +1,21 @@
+[workspace]
+members = [
+    "crates/harness-cli",
+    "crates/harness-core",
+    "crates/harness-test-support",
+]
+resolver = "3"
+
+[workspace.package]
+version = "0.0.0"
+edition = "2024"
+rust-version = "1.98"
+publish = false
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+
+[workspace.lints.clippy]
+dbg_macro = "deny"
+unwrap_used = "warn"
+expect_used = "warn"

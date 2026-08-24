@@ -1,0 +1,10 @@
+/target/
+/dist/
+/book/book/
+__pycache__/
+*.py[cod]
+*.pdf
+*.log
+.DS_Store
+.idea/
+.vscode/

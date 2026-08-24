@@ -1,0 +1,68 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Verify scaffold and book sources
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Install Rust 1.98.0
+        uses: dtolnay/rust-toolchain@6c977a6ca4077a0ceb28ffbe03f59d46e9ac8772
+        with:
+          toolchain: 1.98.0
+          components: clippy,rustfmt
+
+      - name: Install mdBook 0.5.4
+        uses: peaceiris/actions-mdbook@a6f333f62c4b46ed5190d00cab3b7f9a6996274c
+        with:
+          mdbook-version: "0.5.4"
+
+      - name: Install Typst 0.15.1
+        uses: typst-community/setup-typst@c70fa75fa4af2546f1c4bca71eb439a5c2f01bf1
+        with:
+          typst-version: "0.15.1"
+
+      - name: Install CJK fonts for the PDF smoke build
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes fonts-noto-cjk
+
+      - name: Validate scaffold metadata and links
+        run: make scaffold-check
+
+      - name: Check Rust formatting without rewriting files
+        run: make fmt-check
+
+      - name: Check Rust workspace
+        run: make check
+
+      - name: Run Rust tests
+        run: make test
+
+      - name: Run Clippy
+        run: make lint
+
+      - name: Test book Rust examples
+        run: make book-test
+
+      - name: Build HTML book
+        run: make book-build
+
+      - name: Build PDF shell
+        run: make pdf
