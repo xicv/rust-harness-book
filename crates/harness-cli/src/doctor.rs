@@ -142,8 +142,7 @@ fn workspace_root() -> Result<PathBuf, DoctorError> {
     let mut directory = env::current_dir().map_err(DoctorError::CurrentDirectory)?;
 
     loop {
-        if directory.join("rust-toolchain.toml").is_file()
-            && directory.join("Cargo.toml").is_file()
+        if directory.join("rust-toolchain.toml").is_file() && directory.join("Cargo.toml").is_file()
         {
             return Ok(directory);
         }
