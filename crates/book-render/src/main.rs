@@ -43,11 +43,7 @@ fn parse_arguments(
     while let Some(argument) = iterator.next() {
         match argument.as_str() {
             "-h" | "--help" => return Ok(None),
-            "--book" => set_once(
-                &mut book,
-                "--book",
-                next_value(&mut iterator, "--book")?,
-            )?,
+            "--book" => set_once(&mut book, "--book", next_value(&mut iterator, "--book")?)?,
             "--template" => set_once(
                 &mut template,
                 "--template",
@@ -68,8 +64,7 @@ fn parse_arguments(
 
     let book = book.ok_or_else(|| RenderError::new("missing required --book"))?;
     let template = template.ok_or_else(|| RenderError::new("missing required --template"))?;
-    let output_dir =
-        output_dir.ok_or_else(|| RenderError::new("missing required --output-dir"))?;
+    let output_dir = output_dir.ok_or_else(|| RenderError::new("missing required --output-dir"))?;
 
     Ok(Some(RenderRequest::new(book, template, output_dir)))
 }
@@ -89,11 +84,7 @@ fn next_value(
     Ok(PathBuf::from(value))
 }
 
-fn set_once(
-    target: &mut Option<PathBuf>,
-    flag: &str,
-    value: PathBuf,
-) -> Result<(), RenderError> {
+fn set_once(target: &mut Option<PathBuf>, flag: &str, value: PathBuf) -> Result<(), RenderError> {
     if target.replace(value).is_some() {
         return Err(RenderError::new(format!(
             "{flag} may only be supplied once"

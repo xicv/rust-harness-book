@@ -266,9 +266,9 @@ pub fn render_markdown(markdown: &str) -> Result<String, RenderError> {
 pub fn render(request: &RenderRequest) -> Result<RenderReport, RenderError> {
     let book_dir = canonical_existing(request.book_dir(), "book directory")?;
     let template_path = canonical_existing(request.template_path(), "Typst template")?;
-    let template_parent = template_path.parent().ok_or_else(|| {
-        RenderError::new("Typst template has no parent directory")
-    })?;
+    let template_parent = template_path
+        .parent()
+        .ok_or_else(|| RenderError::new("Typst template has no parent directory"))?;
     let project_root = common_ancestor(&book_dir, template_parent).ok_or_else(|| {
         RenderError::new("book directory and Typst template have no common project root")
     })?;
@@ -298,13 +298,8 @@ pub fn render(request: &RenderRequest) -> Result<RenderReport, RenderError> {
     let backup_dir = sibling_work_path(&output_dir, "backup");
     remove_if_exists(&staging_dir, "stale renderer staging directory")?;
     remove_if_exists(&backup_dir, "stale renderer backup directory")?;
-    fs::create_dir_all(staging_dir.join("assets")).map_err(|error| {
-        io_context(
-            "create renderer staging directory",
-            &staging_dir,
-            error,
-        )
-    })?;
+    fs::create_dir_all(staging_dir.join("assets"))
+        .map_err(|error| io_context("create renderer staging directory", &staging_dir, error))?;
 
     let result = render_into_staging(
         &config,
@@ -324,13 +319,11 @@ pub fn render(request: &RenderRequest) -> Result<RenderReport, RenderError> {
     };
 
     let generated_path = staging_dir.join("book.typ");
-    fs::write(&generated_path, generated).map_err(|error| {
-        io_context("write generated Typst book", &generated_path, error)
-    })?;
+    fs::write(&generated_path, generated)
+        .map_err(|error| io_context("write generated Typst book", &generated_path, error))?;
     let staged_template = staging_dir.join("template.typ");
-    fs::copy(&template_path, &staged_template).map_err(|error| {
-        io_context("copy Typst template", &staged_template, error)
-    })?;
+    fs::copy(&template_path, &staged_template)
+        .map_err(|error| io_context("copy Typst template", &staged_template, error))?;
 
     replace_output_directory(&staging_dir, &output_dir, &backup_dir)?;
 

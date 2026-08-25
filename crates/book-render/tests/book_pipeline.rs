@@ -61,7 +61,10 @@ impl TestProject {
                 "- [Chapter One](chapter.md)\n",
             ),
         );
-        self.write("book/src/index.md", "# Introduction\n\nIntro before the part.\n");
+        self.write(
+            "book/src/index.md",
+            "# Introduction\n\nIntro before the part.\n",
+        );
         self.write("book/src/chapter.md", chapter);
         self.write("typst/template.typ", "#let book(body, ..args) = body\n");
     }
@@ -151,9 +154,7 @@ fn include_cannot_escape_the_project_root() {
 #[test]
 fn recursive_includes_fail_closed() {
     let project = TestProject::new("recursive");
-    project.write_base_book(
-        "# Chapter One\n\n```text\n{{#include ../../snippets/a.txt}}\n```\n",
-    );
+    project.write_base_book("# Chapter One\n\n```text\n{{#include ../../snippets/a.txt}}\n```\n");
     project.write("snippets/a.txt", "A\n{{#include b.txt}}\n");
     project.write("snippets/b.txt", "B\n{{#include a.txt}}\n");
 
@@ -168,9 +169,7 @@ fn recursive_includes_fail_closed() {
 #[test]
 fn remote_images_must_be_vendored() {
     let project = TestProject::new("remote-image");
-    project.write_base_book(
-        "# Chapter One\n\n![Remote](https://example.com/diagram.png)\n",
-    );
+    project.write_base_book("# Chapter One\n\n![Remote](https://example.com/diagram.png)\n");
 
     let error = match render(&project.request()) {
         Ok(_) => panic!("remote images must fail"),
