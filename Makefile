@@ -1,4 +1,4 @@
-.PHONY: scaffold-check check test lint fmt-check book-test book-build pdf verify clean
+.PHONY: scaffold-check check test lint fmt-check book-test book-build book-render pdf verify clean
 
 scaffold-check:
 	python3 scripts/check_scaffold.py
@@ -21,9 +21,12 @@ book-test:
 book-build:
 	mdbook build book
 
-pdf:
+book-render:
+	cargo run -p book-render --locked -- --book book --template typst/template.typ --output-dir dist/typst
+
+pdf: book-render
 	mkdir -p dist
-	typst compile typst/book.typ dist/rust-harness-book.pdf
+	typst compile dist/typst/book.typ dist/rust-harness-book.pdf
 
 verify: scaffold-check fmt-check check test lint book-test book-build pdf
 
