@@ -47,22 +47,22 @@ fn parse_inlines(source: &str) -> Result<Vec<Inline>, RenderError> {
             index += close + 1;
             continue;
         }
-        if rest.starts_with("**") {
+        if let Some(stripped) = rest.strip_prefix("**") {
             flush_inline_text(&mut output, &mut text);
-            let close = rest[2..].find("**").ok_or_else(|| {
+            let close = stripped.find("**").ok_or_else(|| {
                 RenderError::new("strong emphasis is not closed")
-            })? + 2;
-            output.push(Inline::Strong(parse_inlines(&rest[2..close])?));
-            index += close + 2;
+            })?;
+            output.push(Inline::Strong(parse_inlines(&stripped[..close])?));
+            index += close + 4;
             continue;
         }
-        if rest.starts_with("~~") {
+        if let Some(stripped) = rest.strip_prefix("~~") {
             flush_inline_text(&mut output, &mut text);
-            let close = rest[2..].find("~~").ok_or_else(|| {
+            let close = stripped.find("~~").ok_or_else(|| {
                 RenderError::new("strikethrough is not closed")
-            })? + 2;
-            output.push(Inline::Strike(parse_inlines(&rest[2..close])?));
-            index += close + 2;
+            })?;
+            output.push(Inline::Strike(parse_inlines(&stripped[..close])?));
+            index += close + 4;
             continue;
         }
         if rest.starts_with('`') {
@@ -81,33 +81,32 @@ fn parse_inlines(source: &str) -> Result<Vec<Inline>, RenderError> {
                 "inline images are unsupported; place the image on its own line",
             ));
         }
-        if rest.starts_with('[') {
-            if let Some(label_end) = rest.find("](") {
-                let destination_start = label_end + 2;
-                let destination_end = rest[destination_start..]
-                    .find(')')
-                    .map(|offset| destination_start + offset)
-                    .ok_or_else(|| RenderError::new("Markdown link is not closed"))?;
-                flush_inline_text(&mut output, &mut text);
-                let label = &rest[1..label_end];
-                let raw_destination = &rest[destination_start..destination_end];
-                let (target, _) = parse_destination_and_title(raw_destination)?;
-                output.push(Inline::Link {
-                    target,
-                    content: parse_inlines(label)?,
-                });
-                index += destination_end + 1;
-                continue;
-            }
+        if let Some(stripped) = rest.strip_prefix('[')
+            && let Some(label_end) = stripped.find("](")
+        {
+            let destination_start = label_end + 2;
+            let destination_end = stripped[destination_start..]
+                .find(')')
+                .map(|offset| destination_start + offset)
+                .ok_or_else(|| RenderError::new("Markdown link is not closed"))?;
+            flush_inline_text(&mut output, &mut text);
+            let label = &stripped[..label_end];
+            let raw_destination = &stripped[destination_start..destination_end];
+            let (target, _) = parse_destination_and_title(raw_destination)?;
+            output.push(Inline::Link {
+                target,
+                content: parse_inlines(label)?,
+            });
+            index += destination_end + 2;
+            continue;
         }
-        if rest.starts_with('*') {
-            if let Some(close_offset) = rest[1..].find('*') {
-                flush_inline_text(&mut output, &mut text);
-                let close = close_offset + 1;
-                output.push(Inline::Emphasis(parse_inlines(&rest[1..close])?));
-                index += close + 1;
-                continue;
-            }
+        if let Some(stripped) = rest.strip_prefix('*')
+            && let Some(close) = stripped.find('*')
+        {
+            flush_inline_text(&mut output, &mut text);
+            output.push(Inline::Emphasis(parse_inlines(&stripped[..close])?));
+            index += close + 2;
+            continue;
         }
         if rest.starts_with('\\') {
             let mut characters = rest.chars();
