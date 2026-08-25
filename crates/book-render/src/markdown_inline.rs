@@ -113,8 +113,13 @@ fn parse_inlines(source: &str) -> Result<Vec<Inline>, RenderError> {
             let mut characters = rest.chars();
             let _ = characters.next();
             if let Some(character) = characters.next() {
-                text.push(character);
-                index += 1 + character.len_utf8();
+                if character.is_ascii_punctuation() {
+                    text.push(character);
+                    index += 1 + character.len_utf8();
+                } else {
+                    text.push('\\');
+                    index += 1;
+                }
             } else {
                 text.push('\\');
                 index += 1;
