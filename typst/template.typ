@@ -2,15 +2,27 @@
   title: none,
   subtitle: none,
   authors: none,
-  language: "zh",
+  language: "zh-CN",
   body,
 ) = {
   set page(
     paper: "a5",
     margin: (x: 18mm, y: 20mm),
+    numbering: "1",
   )
-  set text(size: 10.5pt)
+  set text(
+    font: (
+      "Noto Sans CJK SC",
+      "Noto Sans CJK TC",
+      "PingFang SC",
+      "Hiragino Sans GB",
+      "Arial",
+    ),
+    size: 10.5pt,
+    lang: language,
+  )
   set par(justify: true, leading: 0.72em)
+  show raw: set text(font: ("Noto Sans Mono CJK SC", "Menlo", "DejaVu Sans Mono"))
 
   align(center)[
     #text(size: 22pt, weight: "bold")[#title]
@@ -22,6 +34,8 @@
     }
   ]
 
+  pagebreak()
+  outline(title: [目录 / Contents], depth: 3)
   pagebreak()
   body
 }
@@ -46,6 +60,7 @@
   inset: 10pt,
   radius: 4pt,
   below: 0.8em,
+  breakable: true,
   body,
 )
 
@@ -56,7 +71,11 @@
 
 #let strong(body) = text(weight: "bold", body)
 #let emph(body) = text(style: "italic", body)
+#let strike-text(body) = strike(body)
 #let term(body) = text(style: "italic", fill: rgb("#374151"), body)
+#let inline-code(source) = raw(source)
+#let book-link(target, body) = link(target, body)
+#let book-ref(target, body) = link(target, body)
 
 #let code-block(language, source) = {
   let rendered = if language == "" {
@@ -70,18 +89,20 @@
     inset: 8pt,
     radius: 3pt,
     below: 0.8em,
+    breakable: true,
     rendered,
   )
 }
 
 #let bullet-list(items) = list(..items)
-#let ordered-list(items) = enum(..items)
+#let ordered-list(start, items) = enum(start: start, ..items)
 
 #let quote-block(body) = block(
   width: 100%,
   fill: rgb("#f9fafb"),
   inset: 8pt,
   below: 0.8em,
+  breakable: true,
   body,
 )
 
@@ -92,7 +113,7 @@
 )
 
 #let book-image(path, alt, caption: none) = {
-  let picture = image(path, width: 100%)
+  let picture = image(path, width: 100%, alt: alt)
   if caption == none {
     picture
   } else {
