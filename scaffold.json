@@ -1,7 +1,7 @@
 {
   "project": "rust-harness-book",
   "repository": "https://github.com/xicv/rust-harness-book",
-  "status": "chapters-0-and-1-complete",
+  "status": "chapters-0-and-1-complete-with-full-book-renderer",
   "created_at": "2026-08-24",
   "reviewed_at": "2026-08-25",
   "rust": "1.98.0",
@@ -17,6 +17,6 @@
     "Chapters 0 and 1 contain real prose, registered examples, tests, and evidence receipts.",
     "The harness currently provides a deterministic offline turn and a read-only toolchain doctor.",
     "Remaining planned chapter shells stay visibly labelled as incomplete.",
-    "The Typst output is a build smoke test; full PDF content parity awaits book-render."
+    "book-render generates the full Typst project from canonical Markdown, and the completed chapters have PDF content parity."
   ]
 }

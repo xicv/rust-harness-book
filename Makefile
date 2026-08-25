@@ -2,6 +2,7 @@
 
 scaffold-check:
 	python3 scripts/check_scaffold.py
+	python3 scripts/check_book_render.py
 
 check:
 	cargo check --workspace --locked

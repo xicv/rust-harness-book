@@ -18,6 +18,10 @@ red_2_result = "compiled test compared an empty event list with the five-event c
 green_commit = "3fed46defa0189e4e1a8f5b7dc3ab61743209b08"
 green_ci_run = 32786877627
 
+[publication]
+book_render_green_commit = "2e31c4f3ae3d4fcef7f515b8492e952a9f908f2f"
+book_render_ci_run = 32811487873
+
 [verification]
 required_tests = [
     "one_prompt_produces_ordered_events",
@@ -31,12 +35,14 @@ commands = [
     "cargo test --workspace --locked",
     "mdbook test book -L target/debug/deps",
     "mdbook build book",
-    "typst compile typst/book.typ dist/rust-harness-book.pdf",
+    "cargo run -p book-render --locked -- --book book --template typst/template.typ --output-dir dist/typst",
+    "typst compile dist/typst/book.typ dist/rust-harness-book.pdf",
     "make verify",
 ]
 html = "pass"
+book_render = "pass"
 pdf_build = "pass"
-pdf_content_parity = "pending-book-render"
+pdf_content_parity = "pass"
 
 known_limitations = [
     "fixed demonstration identifiers",

@@ -35,11 +35,15 @@ changed.
 
 Primary sources are recorded in `book/sources.lock.toml`.
 
-### mdBook
+### mdBook and Typst
 
 - Chapter code is included from real source files through named anchors.
 - Displayed Rust is marked non-runnable inside mdBook when it is only a partial
   region; the registered Cargo command remains its verification source.
+- `SUMMARY.md` is the common publication-order contract.
+- Typst 0.15.1 separates a two- or three-letter language code from the optional
+  region code.
+- The PDF is generated from canonical Markdown rather than a second prose copy.
 
 ### Codex
 
@@ -63,7 +67,10 @@ At the pinned snapshot:
 - Chapter 1 adds a read-only `--doctor`; it reports evidence but never changes the
   learner's machine.
 - Cargo verification uses the committed lockfile through `--locked`.
-- No third-party Rust dependency is needed for either chapter.
+- No third-party Rust dependency is needed for either chapter or for
+  `book-render`.
+- The renderer supports the documented book subset and fails closed when a new
+  structure has not been specified and tested.
 
 ## Reference-book boundary
 
@@ -80,4 +87,6 @@ The new chapters independently preserve two useful ideas:
   coverage before portability is claimed.
 - The current Doctor does not inspect rust-analyzer, linkers, targets, mdBook, or
   Typst.
-- The PDF pipeline still lacks canonical Markdown-to-Typst content conversion.
+- Heading-fragment links are not yet supported in PDF output.
+- New diagrams and complex page layouts still require human visual review in
+  both HTML and PDF.

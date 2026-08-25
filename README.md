@@ -2,8 +2,8 @@
 
 [![CI](https://github.com/xicv/rust-harness-book/actions/workflows/ci.yml/badge.svg)](https://github.com/xicv/rust-harness-book/actions/workflows/ci.yml)
 
-> Working title / 暂定书名
-> **《Rust 设计与实战：从零构建可验证的智能体 Harness》**
+> Working title / 暂定书名  
+> **《Rust 设计与实战：从零构建可验证的智能体 Harness》**  
 > **Rust by Design: Building a Verifiable Agent Harness**
 
 This repository contains a bilingual, why-first Rust book and the cumulative
@@ -25,14 +25,15 @@ educational agent harness built throughout it.
 **Chapters 0 and 1 are complete: 2 of 37 planned chapters.**
 
 - Chapter 0 builds one real, deterministic offline turn with typed lifecycle
-  events, input validation, and a black-box CLI test.
+  events, input validation, and black-box CLI tests.
 - Chapter 1 pins the Rust workspace and adds a read-only `--doctor` command that
   compares source-controlled settings with the active Rust and Cargo tools.
 - Every displayed Rust example in these chapters is sourced from checked code
   and registered in `book/examples.toml`.
-- The HTML book is the current complete reading output.
-- The Typst PDF remains an honest smoke-build shell until `book-render` provides
-  full Markdown-to-Typst content parity.
+- mdBook builds the complete mobile-first HTML reading output.
+- `book-render` now converts the same canonical Markdown into generated Typst,
+  and Typst compiles the full PDF. Completed Chapters 0 and 1 therefore have
+  HTML/PDF content parity.
 
 Start here:
 
@@ -41,7 +42,7 @@ Start here:
 3. `chapters/ch00/receipt.toml`
 4. `chapters/ch01/receipt.toml`
 5. `docs/01-BOOK-CONSTITUTION.md`
-6. `docs/04-CHAPTER-MAP.md`
+6. `docs/07-PUBLISHING-PIPELINE.md`
 7. `AGENTS.md`
 
 ## Pinned tools / 固定工具版本
@@ -61,6 +62,22 @@ cargo run -p harness-cli --locked -- --doctor
 ```
 
 Both commands are deterministic and require no API key.
+
+## Build the book / 构建书籍
+
+```sh
+mdbook build book
+make pdf
+```
+
+The PDF path is:
+
+```text
+dist/rust-harness-book.pdf
+```
+
+The generated Typst project lives under `dist/typst/`. It is build output and
+must not be edited or committed. `book/src/` remains the only prose source.
 
 ## Local verification / 本地验证
 
@@ -89,6 +106,10 @@ the committed lockfile through `--locked`.
 This is an original clean-room teaching project. It studies the teaching
 strengths of two Chinese Rust books and the public architecture of OpenAI Codex,
 but it does not copy their prose, diagrams, exercises, or large code sections.
+
+The renderer is purpose-built for the documented book Markdown contract. It
+rejects unsupported HTML, repository-escaping includes, recursive includes, and
+remote images instead of silently producing incomplete output.
 
 The current harness does not claim real model intelligence, tools, streaming,
 persistence, Codex compatibility, or production sandbox security.

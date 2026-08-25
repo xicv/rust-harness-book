@@ -4,7 +4,7 @@ Reviewed: **2026-08-25**
 
 ## Decision
 
-**Go: Chapters 0 and 1 are complete. Chapter 2 is the next valid milestone.**
+**Go: Chapters 0 and 1 and the dual-output publishing foundation are complete. Chapter 2 is the next valid milestone.**
 
 The initial architecture and editorial contracts remain stable. Research now
 continues in small, chapter-specific passes before each new implementation.
@@ -24,6 +24,24 @@ continues in small, chapter-specific passes before each new implementation.
 - Meaningful Red 1, Red 2, and Green evidence for Chapter 0
 - A real Red and Green cycle for the Chapter 1 toolchain doctor
 - Source-controlled example registration and chapter receipts
+- A standard-library-only `book-render` tool that generates Typst from the
+  canonical Markdown source
+- Full HTML and PDF content parity for completed Chapters 0 and 1
+
+## Publishing research now implemented
+
+The publishing pipeline uses one editable prose source:
+
+```text
+book/src/**/*.md
+        ├── mdBook → dist/html/
+        └── book-render → dist/typst/book.typ
+                              └── Typst → dist/rust-harness-book.pdf
+```
+
+`SUMMARY.md` controls order. Tested source includes are expanded for both output
+paths. Unsupported HTML, path escapes, recursive includes, and remote images fail
+closed.
 
 ## Research that continues chapter by chapter
 
@@ -34,6 +52,7 @@ continues in small, chapter-specific passes before each new implementation.
 - Accessibility checks for each new visual component
 - Exact terminology review
 - Rights and attribution review for every external asset
+- Human visual review of new PDF layouts and diagrams
 
 ## Honest build status
 
@@ -42,8 +61,9 @@ continues in small, chapter-specific passes before each new implementation.
   diagnostic command.
 - No real model provider, tools, async runtime, persistence, approval flow, MCP,
   or production sandbox is implemented yet.
-- The HTML chapters build from the canonical Markdown source.
-- The Typst file remains a PDF smoke shell; `book-render` does not exist yet.
+- HTML and PDF are generated from the same canonical Markdown chapters.
+- The renderer intentionally supports the documented book subset rather than all
+  CommonMark and arbitrary HTML.
 
 ## Gate before each chapter
 

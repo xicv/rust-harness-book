@@ -15,6 +15,10 @@ red_result = "the CLI treated --doctor as a normal prompt and emitted the Chapte
 green_commit = "decef67c89afba8e4eb095b0c16454e4aca97eb5"
 green_ci_run = 32788814516
 
+[publication]
+book_render_green_commit = "2e31c4f3ae3d4fcef7f515b8492e952a9f908f2f"
+book_render_ci_run = 32811487873
+
 [verification]
 required_tests = [
     "doctor_reports_pinned_and_active_toolchain",
@@ -29,12 +33,14 @@ commands = [
     "cargo fmt --all -- --check",
     "mdbook test book -L target/debug/deps",
     "mdbook build book",
-    "typst compile typst/book.typ dist/rust-harness-book.pdf",
+    "cargo run -p book-render --locked -- --book book --template typst/template.typ --output-dir dist/typst",
+    "typst compile dist/typst/book.typ dist/rust-harness-book.pdf",
     "make verify",
 ]
 html = "pass"
+book_render = "pass"
 pdf_build = "pass"
-pdf_content_parity = "pending-book-render"
+pdf_content_parity = "pass"
 
 known_limitations = [
     "doctor checks only the core Rust pin, Edition, resolver, and lockfile",
