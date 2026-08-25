@@ -1,6 +1,7 @@
 <!--
 chapter_id: chXX
-status: draft
+chapter_status: planned
+chapter_goal: One clear reader and harness outcome.
 rust: 1.98.0
 codex_commit: 2df67054232090af8d2fa197c46b994bc2b0dda1
 new_terms: []
@@ -9,41 +10,98 @@ examples: []
 
 # 中文标题 / English Title
 
-<div class="learning-card">
-<p class="card-label">Outcome / 本章成果</p>
+> **Status / 状态:** Planned
+> **Harness milestone / Harness 里程碑:** One clear reader and harness outcome.
 
-- What the reader can do
-- What the harness can do
-- The exact command that proves it
+## 先看全局 / Big picture
+
+这一章在全书和产品路线中的位置。
+
+## 概念先行 / Concept first
+
+先用普通语言解释概念，再引入 Rust 术语和语法。
+
+<div class="learning-card">
+<p class="card-label">现在只要知道 / For now</p>
+
+- 当前必须理解的内容
+- 可以留到后面再深入的内容
 
 </div>
 
-## Predict / 先预测
+## 本章要完成什么 / Product goal
 
-## Red test / 红灯测试
+- Harness 新增的能力
+- 公开行为
+- 明确不做的范围
 
-## Read the failure / 读懂失败
+## 先看运行结果 / See it run
 
-## Concept / 概念
+```sh
+# One real command
+```
 
-## Why Rust chose this / 为什么这样设计
+解释输出表达了什么。
 
-## Fair comparison / 公平对比
+## 拆开代码 / Read the code
 
-## Green implementation / 最小实现
+### 第一层
 
-## Refactor / 重构
+- 输入
+- 输出
+- 设计原因
+- 官方资料
 
-## Edge cases / 边界情况
+### 第二层
 
-## Codex source reading / Codex 源码阅读
+继续按职责拆开，不逐行翻译。
 
-## AI candidate review / AI 候选方案审核
+## 这段代码怎样长出来 / TDD story
 
-## Verification / 验证
+### Behaviour / 行为契约
 
-## Harness status / 当前 Harness 状态
+### Red / 先看见正确的失败
 
-## Decision record / 决策记录
+### Green / 最小正确实现
 
-## Stretch / 进一步练习
+### Refactor / 在绿色安全网下整理
+
+### Edge cases / 边界情况
+
+## 为什么 Rust 这样设计 / Why Rust
+
+- Rust 的选择
+- 得到什么
+- 付出什么
+
+## 公平对比 / Fair comparison
+
+比较同一个问题，不做语言战争。
+
+## 自己动手 / Try it
+
+- 聚焦命令
+- 小实验
+- 可选深入练习
+
+## Codex 源码阅读 / Source reading
+
+- Source fact
+- Pinned path
+- Our decision
+- Difference and limit
+
+## AI 候选方案审核 / Review an AI candidate
+
+用测试和工程原则审查一个看似合理但有缺陷的方案。
+
+## 验证与边界 / Verify and limits
+
+- 聚焦测试
+- 累计测试
+- 当前能做什么
+- 当前不能做什么
+
+## 本章小结与下一步 / Recap and next step
+
+用自己的话总结概念、产品增量和下一章连接。

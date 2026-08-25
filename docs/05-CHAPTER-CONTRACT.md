@@ -1,47 +1,157 @@
 # Chapter contract / 单章契约
 
-## Required card order
+## 先区分开发顺序和阅读顺序
 
-- Outcome / 本章成果
-- Predict / 先预测
-- Red test / 红灯测试
-- Read the failure / 读懂失败
-- Concept / 概念
-- Why Rust chose this / 为什么这样设计
-- Fair comparison / 公平对比
-- Green implementation / 最小实现
-- Refactor / 重构
-- Edge cases / 边界情况
-- Codex source reading / Codex 源码阅读
-- AI candidate review / AI 候选方案审核
-- Verification / 验证
-- Harness status / 当前 Harness 状态
-- Decision record / 决策记录
-- Stretch / 进一步练习
+生产代码必须保留真实的 TDD 顺序：
 
-## Definition of done
+```text
+Behaviour → Red → Green → Refactor → Verify
+```
 
-A chapter is complete only when:
+但章节正文采用概念优先的阅读顺序：
 
-- one new behaviour or invariant is clear;
-- the Red test fails for the intended reason;
-- the smallest implementation turns it Green;
-- all earlier tests still pass;
-- the demo works offline;
-- every shown Rust block maps to tested source;
-- compile-fail examples are checked;
-- new terms are registered;
-- source paths and pins are recorded;
-- differences from Codex are explicit;
-- security, performance, and portability limits are stated;
-- mdBook tests and the production HTML build pass;
-- `book-render` generates the chapter from canonical Markdown;
-- Typst compiles the generated full-book source;
-- the receipt records `book_render = "pass"` and
-  `pdf_content_parity = "pass"`;
-- no unrelated formatting changes exist;
-- an evidence receipt is produced.
+```text
+全局目的 → 概念 → 产品目标 → 运行结果 → 代码
+→ TDD 过程 → Rust 设计与比较 → 动手实践
+→ 源码阅读 → 验证、限制和下一步
+```
 
-A chapter is not complete when only HTML builds, when the PDF contains manually
-copied prose, or when unsupported Markdown is silently dropped. Renderer gaps
-must fail closed and begin with a focused Red test.
+不要因为代码是从 Red 开始开发，就强迫读者也从一段失败日志开始阅读。
+
+## Required narrative phases / 必须出现的叙事阶段
+
+章节可以使用自然标题，也可以合并相邻小节，但下列内容应按读者容易理解的顺序出现。
+
+### 1. Big picture / 先看全局
+
+- 这一章解决什么问题；
+- 它在全书产品路线中的位置；
+- 读者不需要预先懂什么。
+
+### 2. Concept / 概念先行
+
+- 用普通语言解释概念；
+- 先讲意义，再讲 Rust 名称和语法；
+- 给出必要的图、类比或状态关系；
+- 标明以后才会深入的内容。
+
+### 3. Product goal / 本章要完成什么
+
+- 本章给 Harness 增加一个什么能力；
+- 公开行为是什么；
+- 明确不在本章实现的范围。
+
+### 4. See it run / 先看结果
+
+- 一条可运行命令；
+- 真实、稳定的输出；
+- 简单解释读者正在看到什么。
+
+### 5. Read the code / 拆开代码
+
+- 按职责分层展示测试源码；
+- 每段说明输入、输出和设计原因；
+- 提供精确的 Rust Book、标准库或 Cargo 文档链接；
+- 不逐行翻译，也不假设读者已懂全部语法。
+
+### 6. TDD story / 代码怎样长出来
+
+- 行为契约；
+- Red 为何失败；
+- 最小 Green；
+- 在绿色安全网下的 Refactor；
+- 边界和负面测试；
+- 这组测试能证明什么、不能证明什么。
+
+### 7. Why Rust and fair comparison / 为什么这样设计
+
+- Rust 的选择；
+- 设计收益；
+- 真实成本；
+- 其他语言的现代做法；
+- 何时其他语言或方案更合适。
+
+### 8. Try it / 自己动手
+
+- 一个可在十到三十分钟完成的小实验；
+- 一个聚焦测试命令；
+- 可选的深入练习；
+- 不用无关题目堆数量。
+
+### 9. Source reading / 源码阅读
+
+- 固定 Codex commit 和精确路径；
+- 来源事实与本书决定分开；
+- 只引用足以支持观点的小段内容；
+- 不声称完整兼容。
+
+### 10. Verify, limits, next / 验证、限制与下一步
+
+- 聚焦命令和累计命令；
+- 当前 Harness 能做什么；
+- 当前还不能做什么；
+- 本章工程决定；
+- 下一章如何接上。
+
+## Cards / 卡片的使用
+
+卡片用来突出重点，不是把整章切成十六个机械方框。
+
+适合使用卡片的内容：
+
+- 核心概念；
+- 运行结果；
+- 容易误解的边界；
+- “现在只要知道”；
+- 动手实验；
+- 本章小结。
+
+普通叙事、代码解读和 TDD 过程可以使用自然段落。移动端默认垂直阅读，重要内容不能依赖横向滑动或 JavaScript。
+
+## Code contract / 代码契约
+
+每个看起来像 Rust 的代码块必须是：
+
+- 从已测试源码通过 include/anchor 引入；
+- 受检查的 compile-fail 例子；
+- 或清楚标明的伪代码。
+
+不得把生产代码手工复制到 Markdown。不得加入无法运行、无法验证、来源不明的示例。
+
+## TDD contract / TDD 契约
+
+- Red 必须为目标行为失败，不是因为拼写、路径或 fixture 错误。
+- Green 是当前测试需要的最小正确实现，不是“故意写坏代码”。
+- 每个小步后运行最聚焦的测试。
+- Refactor 在绿色状态下进行。
+- 测试观察公开行为，不通过复制生产逻辑制造自证。
+- 测试通过代表当前断言成立，不代表软件没有其他缺陷。
+- 发现真实 bug 后，先留下可重复的回归测试。
+- 默认测试离线、确定、无 sleep、无随机依赖。
+
+## Definition of done / 完成标准
+
+一章只有同时满足以下条件，才可以标记为完成：
+
+- 概念、产品目标和公开行为清楚；
+- 新行为或不变量有真实价值；
+- Red 为预期原因失败；
+- 最小实现使其 Green；
+- Refactor 没有破坏行为；
+- 所有更早章节的测试继续通过；
+- 演示可离线运行；
+- 展示的 Rust 全部映射到测试源码；
+- compile-fail 示例受到检查；
+- 新术语已登记；
+- 官方来源、源码路径和版本 pin 已记录；
+- 与 Codex 的差异写清楚；
+- 安全、性能、可移植性和教学边界已说明；
+- 读者有一项可以亲手完成的实验；
+- mdBook tests 和生产 HTML 通过；
+- `book-render` 从 canonical Markdown 生成本章；
+- Typst 可以编译完整书稿；
+- receipt 记录 `book_render = "pass"` 与 `pdf_content_parity = "pass"`；
+- 没有无关格式化或生成文件；
+- 验证 receipt 与实际命令一致。
+
+只生成 HTML 不算完成。PDF 中手工复制第二份正文也不算完成。若 renderer 不支持新结构，应先添加一个聚焦失败测试，再实现支持；不得静默丢弃内容。
