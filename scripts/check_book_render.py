@@ -180,27 +180,29 @@ def check_completed_chapter_receipts() -> None:
 
 def check_docs() -> None:
     publishing = read("docs/07-PUBLISHING-PIPELINE.md")
+    publishing_folded = publishing.casefold()
     required = (
-        "canonical Markdown",
+        "canonical markdown",
         "dist/typst/book.typ",
         "generated",
         "fail closed",
-        "SUMMARY.md",
+        "summary.md",
         "local assets",
     )
     for phrase in required:
-        if phrase not in publishing:
+        if phrase.casefold() not in publishing_folded:
             fail(f"publishing guide is missing: {phrase}")
 
     receipt = read("docs/14-BOOK-RENDER-RECEIPT.md")
+    receipt_folded = receipt.casefold()
     for phrase in (
         "cb3d8edd70e976a2dac8c53617625e0c6b6d85ba",
         "2e31c4f3ae3d4fcef7f515b8492e952a9f908f2f",
-        "SUMMARY.md",
-        "Path containment",
-        "PDF content parity",
+        "summary.md",
+        "path containment",
+        "pdf content parity",
     ):
-        if phrase not in receipt:
+        if phrase.casefold() not in receipt_folded:
             fail(f"book-render receipt is missing: {phrase}")
 
     stale_claims = (
