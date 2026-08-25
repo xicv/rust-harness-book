@@ -2,8 +2,8 @@
 
 [![CI](https://github.com/xicv/rust-harness-book/actions/workflows/ci.yml/badge.svg)](https://github.com/xicv/rust-harness-book/actions/workflows/ci.yml)
 
-> Working title / 暂定书名  
-> **《Rust 设计与实战：从零构建可验证的智能体 Harness》**  
+> Working title / 暂定书名
+> **《Rust 设计与实战：从零构建可验证的智能体 Harness》**
 > **Rust by Design: Building a Verifiable Agent Harness**
 
 This repository contains a bilingual, why-first Rust book and the cumulative
