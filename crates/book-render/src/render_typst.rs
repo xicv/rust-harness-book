@@ -6,6 +6,7 @@ fn render_into_staging(
     _template_path: &Path,
     staging_dir: &Path,
 ) -> Result<(String, usize), RenderError> {
+    let (language, region) = split_language_region(&config.language)?;
     let mut generated = String::new();
     generated.push_str("#import \"template.typ\": *\n\n");
     generated.push_str("#show: book.with(\n");
@@ -30,9 +31,18 @@ fn render_into_staging(
     writeln!(
         generated,
         "  language: \"{}\",",
-        escape_typst_string(&config.language)
+        escape_typst_string(language)
     )
     .map_err(format_error)?;
+    match region {
+        Some(region) => writeln!(
+            generated,
+            "  region: \"{}\",",
+            escape_typst_string(region)
+        )
+        .map_err(format_error)?,
+        None => generated.push_str("  region: none,\n"),
+    }
     generated.push_str(")\n\n");
 
     let mut assets = AssetRegistry::new(project_root, &staging_dir.join("assets"));
@@ -83,6 +93,32 @@ fn render_into_staging(
     }
 
     Ok((generated, assets.len()))
+}
+
+fn split_language_region(value: &str) -> Result<(&str, Option<&str>), RenderError> {
+    let mut parts = value.split('-');
+    let language = parts.next().filter(|part| {
+        matches!(part.len(), 2 | 3) && part.chars().all(|character| character.is_ascii_alphabetic())
+    });
+    let Some(language) = language else {
+        return Err(RenderError::new(format!(
+            "book language must start with a two- or three-letter ISO code: {value:?}"
+        )));
+    };
+    let region = parts.next();
+    if parts.next().is_some() {
+        return Err(RenderError::new(format!(
+            "book language may contain at most one region suffix: {value:?}"
+        )));
+    }
+    if let Some(region) = region
+        && (region.len() != 2 || !region.chars().all(|character| character.is_ascii_alphabetic()))
+    {
+        return Err(RenderError::new(format!(
+            "book region must be a two-letter ISO code: {region:?}"
+        )));
+    }
+    Ok((language, region))
 }
 
 fn remove_matching_title(
@@ -343,9 +379,9 @@ fn resolve_link(
     let Some(chapter_path) = environment.chapter_path else {
         return Ok(ResolvedLink::External(target.to_owned()));
     };
-    let project_root = environment.project_root.ok_or_else(|| {
-        RenderError::new("local links require a project root")
-    })?;
+    let project_root = environment
+        .project_root
+        .ok_or_else(|| RenderError::new("local links require a project root"))?;
 
     if target.starts_with('#') {
         let current = canonical_existing(chapter_path, "current chapter")?;
@@ -361,9 +397,9 @@ fn resolve_link(
             "heading-fragment links are not yet supported in PDF output: {target}"
         )));
     }
-    let parent = chapter_path.parent().ok_or_else(|| {
-        RenderError::new("chapter source has no parent directory")
-    })?;
+    let parent = chapter_path
+        .parent()
+        .ok_or_else(|| RenderError::new("chapter source has no parent directory"))?;
     let resolved = canonical_existing(&parent.join(path_part), "local chapter link")?;
     ensure_inside(project_root, &resolved, "local chapter link")?;
     let label = environment.chapter_labels.get(&resolved).ok_or_else(|| {
