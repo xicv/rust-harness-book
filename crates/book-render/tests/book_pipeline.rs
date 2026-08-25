@@ -21,6 +21,10 @@ impl TestProject {
             let _ = fs::remove_dir_all(&root);
         }
         create_dir(&root);
+        let root = match fs::canonicalize(&root) {
+            Ok(path) => path,
+            Err(error) => panic!("failed to canonicalize {}: {error}", root.display()),
+        };
         Self { root }
     }
 

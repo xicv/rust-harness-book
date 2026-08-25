@@ -9,7 +9,7 @@ The exact versions are recorded in `book/sources.lock.toml` and CI.
 
 ## Canonical source
 
-Markdown under `book/src/` is the editorial source of truth. Tested Rust source
+Canonical Markdown under `book/src/` is the editorial source of truth. Tested Rust source
 lives under `crates/` and is included into chapters by path and anchor.
 
 Do not maintain a second prose copy in Typst. `typst/template.typ` contains
