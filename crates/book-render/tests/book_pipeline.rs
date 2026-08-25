@@ -124,7 +124,7 @@ fn render_expands_sources_orders_summary_and_copies_assets() {
     assert!(!generated.contains("hidden_after"));
     assert!(generated.contains("#card("));
     assert!(generated.contains("#book-image("));
-    assert!(project.path("dist/typst/assets/asset-000.svg").is_file());
+    assert!(project.path("dist/typst/assets/asset-0000.svg").is_file());
     assert!(project.path("dist/typst/template.typ").is_file());
 }
 
