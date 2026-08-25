@@ -2,7 +2,8 @@
   title: none,
   subtitle: none,
   authors: none,
-  language: "zh-CN",
+  language: "zh",
+  region: "CN",
   body,
 ) = {
   set page(
@@ -11,18 +12,13 @@
     numbering: "1",
   )
   set text(
-    font: (
-      "Noto Sans CJK SC",
-      "Noto Sans CJK TC",
-      "PingFang SC",
-      "Hiragino Sans GB",
-      "Arial",
-    ),
+    font: "Noto Sans CJK SC",
     size: 10.5pt,
     lang: language,
+    region: region,
   )
   set par(justify: true, leading: 0.72em)
-  show raw: set text(font: ("Noto Sans Mono CJK SC", "Menlo", "DejaVu Sans Mono"))
+  show raw: set text(font: ("DejaVu Sans Mono", "Noto Sans CJK SC"))
 
   align(center)[
     #text(size: 22pt, weight: "bold")[#title]
