@@ -32,6 +32,9 @@ changed.
   interface.
 - Cargo exposes built binaries to integration tests through
   `CARGO_BIN_EXE_<name>`.
+- Rust's 2026 Vision Doc learning research reports that learners often need
+  repeated passes in multiple formats, learn through projects and compiler
+  feedback, and may need to unlearn habits from previous languages.
 
 Primary sources are recorded in `book/sources.lock.toml`.
 
