@@ -63,3 +63,4 @@
 - [章节代码包 / Chapter code packs](_delivery/chapter-code.md)
   - [第 0 章代码包 / Chapter 0 code pack](_delivery/ch00.md)
   - [第 1 章代码包 / Chapter 1 code pack](_delivery/ch01.md)
+- [Book license / 本书许可](_delivery/book-license.md)

@@ -27,6 +27,8 @@ fn gitbook_export_reuses_canonical_parsing_and_expands_includes() {
             "- [Introduction](index.md)\n\n",
             "# Part One / 第一部分\n",
             "- [Chapter One](chapter.md)\n",
+            "\n# Reader resources\n",
+            "- [Book license](_delivery/book-license.md)\n",
         ),
     );
     project.write(
@@ -48,6 +50,9 @@ fn gitbook_export_reuses_canonical_parsing_and_expands_includes() {
             "{{#rustdoc_include ../../snippets/example.rs:demo}}\n",
             "```\n\n",
             "![Diagram](../../images/diagram.svg \"Diagram caption\")\n\n",
+            "~~~lang`variant\n",
+            "tilde-safe\n",
+            "~~~\n\n",
             "[Back to the Introduction](index.md)\n",
         ),
     );
@@ -65,11 +70,24 @@ fn gitbook_export_reuses_canonical_parsing_and_expands_includes() {
         "images/diagram.svg",
         "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"10\"></svg>\n",
     );
+    project.write(
+        "book/src/_delivery/book-license.md",
+        concat!(
+            "# Book license\n\n",
+            "```text\n",
+            "{{#include ../../../LICENSE-BOOK}}\n",
+            "```\n",
+        ),
+    );
+    project.write(
+        "LICENSE-BOOK",
+        "MIT License\n\nPermission is hereby granted.\n",
+    );
     let request = GitBookExportRequest::new(project.path("book"), project.path("dist/gitbook"));
 
     let report = export_gitbook(&request).unwrap_or_else(|error| panic!("export failed: {error}"));
 
-    assert_eq!(report.chapter_count(), 2);
+    assert_eq!(report.chapter_count(), 3);
     assert_eq!(report.asset_count(), 1);
     assert_eq!(report.output_directory(), project.path("dist/gitbook"));
     assert_eq!(
@@ -89,7 +107,12 @@ fn gitbook_export_reuses_canonical_parsing_and_expands_includes() {
     assert!(!chapter.contains("rustdoc_include"));
     assert!(!chapter.contains("hidden_before"));
     assert!(chapter.contains("![Diagram](assets/asset-0000.svg \"Diagram caption\")"));
+    assert!(chapter.contains("~~~lang`variant\ntilde-safe\n~~~"));
     assert!(chapter.contains("[Back to the Introduction](README.md)"));
+    assert_eq!(
+        read_file(&project.path("dist/gitbook/_delivery/book-license.md")),
+        "# Book license\n\n```text\nMIT License\n\nPermission is hereby granted.\n\n```\n"
+    );
     assert!(project.path("dist/gitbook/assets/asset-0000.svg").is_file());
 }
 

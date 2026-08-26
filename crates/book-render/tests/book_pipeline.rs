@@ -95,6 +95,30 @@ fn render_expands_sources_orders_summary_and_copies_assets() {
         "</div>\n",
     ));
     project.write(
+        "book/src/SUMMARY.md",
+        concat!(
+            "# Summary\n\n",
+            "- [Introduction](index.md)\n\n",
+            "# Part One / 第一部分\n",
+            "- [Chapter One](chapter.md)\n\n",
+            "# Reader resources\n",
+            "- [Book license](_delivery/book-license.md)\n",
+        ),
+    );
+    project.write(
+        "book/src/_delivery/book-license.md",
+        concat!(
+            "# Book license\n\n",
+            "```text\n",
+            "{{#include ../../../LICENSE-BOOK}}\n",
+            "```\n",
+        ),
+    );
+    project.write(
+        "LICENSE-BOOK",
+        "MIT License\n\nPermission is hereby granted.\n",
+    );
+    project.write(
         "snippets/example.rs",
         concat!(
             "fn hidden_before() {}\n",
@@ -113,8 +137,8 @@ fn render_expands_sources_orders_summary_and_copies_assets() {
         panic!("the complete fixture should render");
     };
 
-    assert_eq!(report.chapter_count(), 2);
-    assert_eq!(report.part_count(), 1);
+    assert_eq!(report.chapter_count(), 3);
+    assert_eq!(report.part_count(), 2);
     assert_eq!(report.asset_count(), 1);
     assert_eq!(report.output_path(), project.path("dist/typst/book.typ"));
 
@@ -128,6 +152,7 @@ fn render_expands_sources_orders_summary_and_copies_assets() {
     assert!(!generated.contains("hidden_after"));
     assert!(generated.contains("#card("));
     assert!(generated.contains("#book-image("));
+    assert!(generated.contains("MIT License\\n\\nPermission is hereby granted."));
     assert!(project.path("dist/typst/assets/asset-0000.svg").is_file());
     assert!(project.path("dist/typst/template.typ").is_file());
 }
