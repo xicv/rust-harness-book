@@ -6,9 +6,8 @@
 > **《Rust 设计与实战：从零构建可验证的智能体 Harness》**
 > **Rust by Design: Building a Verifiable Agent Harness**
 
-This repository is the reviewed scaffold for a bilingual, why-first Rust book.
-The reader learns modern Rust by building one real local agent harness from
-start to finish.
+This repository contains a bilingual, why-first Rust book and the cumulative
+educational agent harness built throughout it.
 
 ## Project promise / 项目承诺
 
@@ -23,22 +22,28 @@ start to finish.
 
 ## Current status / 当前状态
 
-**The scaffold has passed its first content and structure review and is ready for
-Chapter 0.** Phase 0 research is complete enough to freeze the initial direction.
-Each chapter still receives a focused source refresh before writing starts.
+**Chapters 0 and 1 are complete: 2 of 37 planned chapters.**
 
-The 37 chapter files are planning shells, not finished book content. They are
-labelled clearly so the repository never presents a placeholder as a completed
-chapter.
+- Chapter 0 builds one real, deterministic offline turn with typed lifecycle
+  events, input validation, and black-box CLI tests.
+- Chapter 1 pins the Rust workspace and adds a read-only `--doctor` command that
+  compares source-controlled settings with the active Rust and Cargo tools.
+- Every displayed Rust example in these chapters is sourced from checked code
+  and registered in `book/examples.toml`.
+- mdBook builds the complete mobile-first HTML reading output.
+- `book-render` now converts the same canonical Markdown into generated Typst,
+  and Typst compiles the full PDF. Completed Chapters 0 and 1 therefore have
+  HTML/PDF content parity.
 
 Start here:
 
-1. `docs/00-RESEARCH-STATUS.md`
-2. `docs/01-BOOK-CONSTITUTION.md`
-3. `docs/04-CHAPTER-MAP.md`
-4. `docs/10-FIRST-CHAPTER-BRIEF.md`
-5. `docs/11-SCAFFOLD-REVIEW.md`
-6. `AGENTS.md`
+1. `book/src/00-preface/00-one-complete-turn.md`
+2. `book/src/00-preface/01-toolchain-as-evidence.md`
+3. `chapters/ch00/receipt.toml`
+4. `chapters/ch01/receipt.toml`
+5. `docs/01-BOOK-CONSTITUTION.md`
+6. `docs/07-PUBLISHING-PIPELINE.md`
+7. `AGENTS.md`
 
 ## Pinned tools / 固定工具版本
 
@@ -48,6 +53,31 @@ Start here:
 - Codex source snapshot `2df67054232090af8d2fa197c46b994bc2b0dda1`
 
 The exact pins live in `rust-toolchain.toml` and `book/sources.lock.toml`.
+
+## Try the harness / 运行 Harness
+
+```sh
+cargo run -p harness-cli -- "hello"
+cargo run -p harness-cli --locked -- --doctor
+```
+
+Both commands are deterministic and require no API key.
+
+## Build the book / 构建书籍
+
+```sh
+mdbook build book
+make pdf
+```
+
+The PDF path is:
+
+```text
+dist/rust-harness-book.pdf
+```
+
+The generated Typst project lives under `dist/typst/`. It is build output and
+must not be edited or committed. `book/src/` remains the only prose source.
 
 ## Local verification / 本地验证
 
@@ -68,16 +98,21 @@ Or run the complete check-only pipeline:
 make verify
 ```
 
-`fmt-check` only checks formatting. It does not rewrite files.
+`fmt-check` checks formatting without rewriting files. Cargo verification uses
+the committed lockfile through `--locked`.
 
 ## Important boundary / 重要边界
 
 This is an original clean-room teaching project. It studies the teaching
 strengths of two Chinese Rust books and the public architecture of OpenAI Codex,
-but it must not copy their prose, diagrams, exercises, or large code sections.
+but it does not copy their prose, diagrams, exercises, or large code sections.
 
-No teaching implementation has been added yet. Chapter 0 will add the first
-Red → Green behaviour and the first runnable harness flow.
+The renderer is purpose-built for the documented book Markdown contract. It
+rejects unsupported HTML, repository-escaping includes, recursive includes, and
+remote images instead of silently producing incomplete output.
+
+The current harness does not claim real model intelligence, tools, streaming,
+persistence, Codex compatibility, or production sandbox security.
 
 No project-wide reuse licence has been selected. See
 `docs/08-SOURCE-AND-RIGHTS-POLICY.md` before reusing material.

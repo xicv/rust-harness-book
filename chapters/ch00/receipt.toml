@@ -1,0 +1,52 @@
+schema_version = 1
+id = "ch00"
+status = "completed"
+completed_at = "2026-08-25"
+offline = true
+rust = "1.98.0"
+mdbook = "0.5.4"
+typst = "0.15.1"
+codex_commit = "2df67054232090af8d2fa197c46b994bc2b0dda1"
+
+[tdd]
+red_1_commit = "5424534ddadf03d077c64e12b1f3ca96d9b42ad2"
+red_1_ci_run = 32786145608
+red_1_result = "intended public lifecycle API was unresolved"
+red_2_commit = "53de82af38256891fcc0fd74f306d27e904e48a2"
+red_2_ci_run = 32786491118
+red_2_result = "compiled test compared an empty event list with the five-event contract"
+green_commit = "3fed46defa0189e4e1a8f5b7dc3ab61743209b08"
+green_ci_run = 32786877627
+
+[publication]
+book_render_green_commit = "2e31c4f3ae3d4fcef7f515b8492e952a9f908f2f"
+book_render_ci_run = 32811487873
+
+[verification]
+required_tests = [
+    "one_prompt_produces_ordered_events",
+    "blank_prompt_is_rejected_before_turn_start",
+    "completed_event_reuses_thread_and_turn_ids",
+    "cli_prints_ordered_events",
+]
+commands = [
+    "cargo test -p harness-core --test turn_flow --locked",
+    "cargo test -p harness-cli --test cli --locked",
+    "cargo test --workspace --locked",
+    "mdbook test book -L target/debug/deps",
+    "mdbook build book",
+    "cargo run -p book-render --locked -- --book book --template typst/template.typ --output-dir dist/typst",
+    "typst compile dist/typst/book.typ dist/rust-harness-book.pdf",
+    "make verify",
+]
+html = "pass"
+book_render = "pass"
+pdf_build = "pass"
+pdf_content_parity = "pass"
+
+known_limitations = [
+    "fixed demonstration identifiers",
+    "one synchronous turn only",
+    "offline echo model, not model intelligence",
+    "no streaming, tools, approvals, persistence, or Codex compatibility claim",
+]

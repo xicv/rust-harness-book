@@ -1,5 +1,6 @@
 [workspace]
 members = [
+    "crates/book-render",
     "crates/harness-cli",
     "crates/harness-core",
     "crates/harness-test-support",

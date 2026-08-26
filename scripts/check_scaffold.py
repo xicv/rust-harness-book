@@ -134,9 +134,10 @@ def chapter_ids_from_map() -> list[str]:
     return ids
 
 
-def check_chapters() -> set[str]:
+def check_chapters() -> tuple[set[str], set[str]]:
     chapter_ids = chapter_ids_from_map()
     entries = summary_chapter_targets()
+    completed_ids: set[str] = set()
     if len(entries) != len(chapter_ids):
         fail(
             "chapter count mismatch between SUMMARY and chapter map: "
@@ -167,6 +168,10 @@ def check_chapters() -> set[str]:
         if status_match is None:
             fail(f"chapter metadata has no chapter_status: {relative(target)}")
         status = status_match.group(1)
+        if status == "completed":
+            completed_ids.add(chapter_id)
+        elif status != "planned":
+            fail(f"unsupported chapter status for {chapter_id}: {status}")
         if status == "planned":
             if "Status / 状态:** Planned" not in text:
                 fail(f"planned chapter is not visibly labelled: {relative(target)}")
@@ -189,7 +194,7 @@ def check_chapters() -> set[str]:
             f"actual is {completed_actual}"
         )
 
-    return set(chapter_ids)
+    return set(chapter_ids), completed_ids
 
 
 def check_terms(chapter_ids: set[str]) -> None:
@@ -216,9 +221,22 @@ def check_terms(chapter_ids: set[str]) -> None:
         pairs.add(pair)
 
 
-def check_examples(chapter_ids: set[str]) -> None:
+def chapter_metadata_examples(target: Path) -> set[str]:
+    text = target.read_text(encoding="utf-8")
+    match = re.search(r"^examples:\s*\[([^]]*)\]", text, re.M)
+    if match is None:
+        return set()
+    return {
+        item.strip()
+        for item in match.group(1).split(",")
+        if item.strip()
+    }
+
+
+def check_examples(chapter_ids: set[str], completed_ids: set[str]) -> set[str]:
     data = load_toml(ROOT / "book/examples.toml")
     ids: set[str] = set()
+    example_chapters: set[str] = set()
     for example in data.get("example", []):
         example_id = example.get("id")
         if not isinstance(example_id, str) or not example_id:
@@ -229,14 +247,77 @@ def check_examples(chapter_ids: set[str]) -> None:
         chapter = example.get("chapter")
         if chapter not in chapter_ids:
             fail(f"example {example_id} has invalid chapter: {chapter}")
+        example_chapters.add(chapter)
         source = example.get("source")
-        if not isinstance(source, str) or not (ROOT / source).is_file():
+        source_path = ROOT / source if isinstance(source, str) else None
+        if source_path is None or not source_path.is_file():
             fail(f"example {example_id} source does not exist: {source}")
+        anchor = example.get("anchor")
+        if anchor is not None:
+            if not isinstance(anchor, str) or not anchor:
+                fail(f"example {example_id} has an invalid anchor")
+            source_text = source_path.read_text(encoding="utf-8")
+            if f"ANCHOR: {anchor}" not in source_text:
+                fail(f"example {example_id} start anchor does not exist: {anchor}")
+            if f"ANCHOR_END: {anchor}" not in source_text:
+                fail(f"example {example_id} end anchor does not exist: {anchor}")
         command = example.get("command")
         if not isinstance(command, list) or not command or not all(isinstance(item, str) for item in command):
             fail(f"example {example_id} needs a non-empty string command array")
         if not isinstance(example.get("offline"), bool):
             fail(f"example {example_id} needs an offline boolean")
+
+    targets = summary_chapter_targets()
+    for chapter_id, (_, target) in zip(chapter_ids_from_map(), targets, strict=True):
+        if chapter_id not in completed_ids:
+            continue
+        metadata_ids = chapter_metadata_examples(target)
+        if not metadata_ids:
+            fail(f"completed chapter has no examples metadata: {chapter_id}")
+        unknown = metadata_ids - ids
+        if unknown:
+            fail(f"completed chapter {chapter_id} has unregistered examples: {sorted(unknown)}")
+        if chapter_id not in example_chapters:
+            fail(f"completed chapter has no registered examples: {chapter_id}")
+
+    return ids
+
+
+def check_completed_receipts(completed_ids: set[str]) -> None:
+    sources = load_toml(ROOT / "book/sources.lock.toml")
+    expected_versions = {
+        "rust": sources.get("rust", {}).get("toolchain"),
+        "mdbook": sources.get("mdbook", {}).get("version"),
+        "typst": sources.get("typst", {}).get("version"),
+        "codex_commit": sources.get("codex", {}).get("commit"),
+    }
+
+    for chapter_id in sorted(completed_ids):
+        receipt_path = ROOT / "chapters" / chapter_id / "receipt.toml"
+        if not receipt_path.is_file():
+            fail(f"completed chapter has no receipt: {chapter_id}")
+        receipt = load_toml(receipt_path)
+        if receipt.get("schema_version") != 1:
+            fail(f"completed chapter has unsupported receipt schema: {chapter_id}")
+        if receipt.get("id") != chapter_id or receipt.get("status") != "completed":
+            fail(f"completed chapter receipt identity/status mismatch: {chapter_id}")
+        if receipt.get("offline") is not True:
+            fail(f"completed chapter receipt must confirm offline verification: {chapter_id}")
+        for key, expected in expected_versions.items():
+            if receipt.get(key) != expected:
+                fail(f"completed chapter receipt {key} does not match source ledger: {chapter_id}")
+        verification = receipt.get("verification")
+        if not isinstance(verification, dict):
+            fail(f"completed chapter receipt has no verification table: {chapter_id}")
+        required_tests = verification.get("required_tests")
+        commands = verification.get("commands")
+        if not isinstance(required_tests, list) or not required_tests or not all(isinstance(item, str) for item in required_tests):
+            fail(f"completed chapter receipt has invalid required_tests: {chapter_id}")
+        if not isinstance(commands, list) or not commands or not all(isinstance(item, str) for item in commands):
+            fail(f"completed chapter receipt has invalid commands: {chapter_id}")
+        for key in ("html", "pdf_build", "pdf_content_parity"):
+            if not isinstance(verification.get(key), str) or not verification[key]:
+                fail(f"completed chapter receipt has invalid {key}: {chapter_id}")
 
 
 def check_version_pins() -> None:
@@ -329,15 +410,19 @@ def check_css_balance() -> None:
 def main() -> None:
     parse_data_files()
     check_markdown_links()
-    chapter_ids = check_chapters()
+    chapter_ids, completed_ids = check_chapters()
     check_terms(chapter_ids)
-    check_examples(chapter_ids)
+    check_examples(chapter_ids, completed_ids)
+    check_completed_receipts(completed_ids)
     check_version_pins()
     check_action_pins()
     check_text_hygiene()
     check_unwanted_files()
     check_css_balance()
-    print(f"scaffold checks passed ({len(chapter_ids)} planned chapters)")
+    print(
+        "scaffold checks passed "
+        f"({len(chapter_ids)} chapters, {len(completed_ids)} completed)"
+    )
 
 
 if __name__ == "__main__":

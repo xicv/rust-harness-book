@@ -1,0 +1,50 @@
+schema_version = 1
+id = "ch01"
+status = "completed"
+completed_at = "2026-08-25"
+offline = true
+rust = "1.98.0"
+mdbook = "0.5.4"
+typst = "0.15.1"
+codex_commit = "2df67054232090af8d2fa197c46b994bc2b0dda1"
+
+[tdd]
+red_commit = "28b1ecff3d3883692cb2faaf72cdf019e54ecf9e"
+red_ci_run = 32786979806
+red_result = "the CLI treated --doctor as a normal prompt and emitted the Chapter 0 event flow"
+green_commit = "decef67c89afba8e4eb095b0c16454e4aca97eb5"
+green_ci_run = 32788814516
+
+[publication]
+book_render_green_commit = "2e31c4f3ae3d4fcef7f515b8492e952a9f908f2f"
+book_render_ci_run = 32811487873
+
+[verification]
+required_tests = [
+    "doctor_reports_pinned_and_active_toolchain",
+    "cli_prints_ordered_events",
+    "one_prompt_produces_ordered_events",
+]
+commands = [
+    "cargo run -p harness-cli --locked -- --doctor",
+    "cargo check --workspace --locked",
+    "cargo test --workspace --locked",
+    "cargo clippy --workspace --all-targets --locked -- -D warnings",
+    "cargo fmt --all -- --check",
+    "mdbook test book -L target/debug/deps",
+    "mdbook build book",
+    "cargo run -p book-render --locked -- --book book --template typst/template.typ --output-dir dist/typst",
+    "typst compile dist/typst/book.typ dist/rust-harness-book.pdf",
+    "make verify",
+]
+html = "pass"
+book_render = "pass"
+pdf_build = "pass"
+pdf_content_parity = "pass"
+
+known_limitations = [
+    "doctor checks only the core Rust pin, Edition, resolver, and lockfile",
+    "doctor does not install, update, or repair tools",
+    "platform target, rust-analyzer, mdBook, and Typst are not yet probed by the CLI",
+    "doctor must run inside the repository or one of its descendant directories",
+]

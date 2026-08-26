@@ -1,52 +1,173 @@
 # Terminology and style / 术语与文风
 
-## Tone
+## 我们的声音 / Our voice
+
+我们不是站在讲台上的全知导师。
+
+我们是一群正在学习、正在做项目，也愿意把思考过程写下来的工程师。正文通常使用“我们”：
+
+- “我们先看看这个问题为什么会出现。”
+- “现在不用记住全部语法。”
+- “先把它跑起来，再回来拆开。”
+- “这里我们也曾经理解错。”
+- “这条测试支持了什么？还有什么没有支持？”
+
+可以承认困惑、试验和修正，但不能用随意口吻掩盖技术不准确。
+
+## Tone / 语气
 
 - Smart casual
-- Friendly, not childish
-- Short paragraphs
-- Concise dot points
-- Easy, modern English
-- Concrete verbs
-- No unnecessary jargon
-- No language-war tone
+- 友好，但不幼稚
+- 像同学一起解决问题，不像导师宣读答案
+- 句子短一些
+- 一段只讲一个重点
+- 使用具体动词
+- 先用普通话解释，再引入术语
+- 少用抽象口号
+- 不制造语言战争
+- 不用“高大上”“神奇”“秒杀”等宣传词
 
-## Bilingual terms
+## 不要这样写 / Avoid
 
-First important use:
+尽量避免：
 
-> **所有权** *Ownership*
+- “显然……”
+- “这很简单……”
+- “只需要……”
+- “大家都知道……”
+- “Rust 完美解决了……”
+- 连续几段定义，没有实际问题；
+- 一上来就抛出完整类型签名；
+- 用十几个 bullet 代替叙事；
+- 为了显得专业而堆叠中英文缩写；
+- 把测试通过写成“代码已经绝对正确”。
 
-Later uses may use the Chinese term alone unless the English form helps the
-reader follow code, diagnostics, or documentation.
+更好的写法是：
 
-## Important distinctions
+> 这段语法现在看起来可能有点陌生。我们先只抓住一件事：`Result` 把“成功”和“失败”放进返回类型里。具体写法会在第 7 章再深入。
 
-- Codex **会话** *Thread* is a conversation container, not an operating-system
-  thread.
-- An operating-system thread is **操作系统线程** *OS Thread*.
-- Keep the word **Trait** visible. “特征” may help the first explanation, but
-  Rust code and compiler messages use `trait`.
-- Use **智能体运行框架** *Agent Harness* for the project concept. The shorter
-  word “Harness” may remain in the title and code-facing names.
+## 句式和节奏 / Sentence rhythm
 
-## Typography roles
-
-- Chinese body: normal reading face
-- English technical term: contrasting sans-serif style
-- Rust identifier, command, path: monospace
-- Warning and status: icon or text label as well as colour
-
-## Comparison style
-
-- Compare one problem at a time.
-- Use the modern, strongest form of the other language.
-- State where Rust is better.
-- State where Rust costs more.
-- State when the other language is the better choice.
-
-## Explanation formula
+正文优先使用：
 
 ```text
-Problem → Other approaches → Rust choice → Why → Gain → Cost → Harness use → Test
+问题是什么。
+为什么会有这个问题。
+我们准备怎样处理。
+先看结果。
+再看代码中的一小层。
+最后用证据确认。
 ```
+
+一段通常两到五句。列表只用于真正并列的信息。
+
+## 概念优先 / Concept first
+
+重要概念第一次出现时，使用以下顺序：
+
+```text
+现实问题
+→ 普通语言解释
+→ 一个小例子或关系图
+→ Rust 术语
+→ Rust 语法
+→ 工程收益和成本
+```
+
+不要从关键字定义开始。
+
+## Bilingual terms / 中英术语
+
+第一次重要使用：
+
+> **所有权** <span class="term-en">Ownership</span>
+
+后续可以只使用中文，除非英文有助于阅读代码、编译器消息或官方文档。
+
+保持这些区分：
+
+- Codex **会话** *Thread* 是对话容器，不是操作系统线程。
+- 操作系统线程写作 **操作系统线程** *OS Thread*。
+- 保留 **Trait** 一词。“接口”可以帮助理解，但 Rust 代码和诊断使用 `trait`。
+- 项目概念统一为 **智能体运行框架** *Agent Harness*。
+- **回合** *Turn* 指一次用户输入和随后发生的智能体工作。
+- **条目** *Item* 是回合中的一项输入或输出。
+- **事件** *Event* 是外部可观察到的变化。
+
+## Typography / 排版角色
+
+- 中文正文：正常阅读字体
+- 英文技术术语：对比明显的 sans-serif
+- Rust 标识符、命令、路径：monospace
+- 警告和状态：文字或图标与颜色同时表达
+- 代码：可选择文字，不使用代码截图替代
+- 长输出：只保留支持当前观点的部分
+
+## Code explanation / 代码解读
+
+每段代码前先说它解决什么。
+
+代码之后只解释当前需要的层次：
+
+- 这段代码接收什么；
+- 返回什么；
+- 关键类型表达什么；
+- 哪部分现在可以先略过；
+- 哪个测试保护它；
+- 去哪里查看完整语法。
+
+不逐行念代码，也不复制官方手册。
+
+## Official links / 官方链接
+
+在概念第一次出现的附近，提供最精确的官方入口，而不是一大串“拓展阅读”。
+
+优先级：
+
+1. The Rust Programming Language
+2. Standard Library documentation
+3. Cargo Book
+4. rustup book
+5. 固定版本的 Codex 源码与测试
+
+链接用于查证和继续学习。正文仍要独立讲清楚核心意思。
+
+## Comparison style / 对比方式
+
+一次只比较一个问题。
+
+- 使用对方语言的现代、正常做法；
+- 说清 Rust 的优势；
+- 说清 Rust 要付出的成本；
+- 说清什么时候对方更合适；
+- 不用过时或故意脆弱的例子衬托 Rust。
+
+## TDD writing style / TDD 的写法
+
+TDD 章节不是把终端日志全部倒给读者。
+
+讲清四件事：
+
+1. 我们希望出现什么行为；
+2. 第一次为什么失败；
+3. 最小改动是什么；
+4. 测试怎样让后续重构更安心。
+
+测试是可执行证据，不是没有 bug 的证明。用“小步、可观察、可撤回”来解释 TDD，不把 Red 当作仪式。
+
+## Explanation formula / 解释公式
+
+```text
+Big picture
+→ Concept
+→ Product goal
+→ Result
+→ Code
+→ TDD story
+→ Rust choice
+→ Gain and cost
+→ Try it
+→ Evidence and limits
+```
+
+这是一条默认路线，不是机械模板。清晰度高于格式整齐。

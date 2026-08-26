@@ -25,10 +25,10 @@ git-repository-url = "https://github.com/xicv/rust-harness-book"
 edit-url-template = "https://github.com/xicv/rust-harness-book/edit/main/book/src/{path}"
 
 [output.html.playground]
-editable = false
+editable = true
 copyable = true
 copy-js = true
-line-numbers = false
+line-numbers = true
 runnable = true
 
 [output.html.search]

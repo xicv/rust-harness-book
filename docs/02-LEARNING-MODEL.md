@@ -1,45 +1,209 @@
 # Learning model / 学习模型
 
-## Main loop
+## 一条主线，两个顺序 / One project, two sequences
+
+全书围绕同一个 Agent Harness 前进，但要同时照顾两件事：
+
+- 代码应该怎样可靠地开发；
+- 读者应该怎样自然地理解。
+
+它们有关联，却不需要使用相同顺序。
+
+### 工程开发顺序
 
 ```text
-Problem → Predict → Red → Explain → Green → Refactor → Verify → Compare → Record
+Problem
+→ Behaviour contract
+→ Red
+→ Green
+→ Refactor
+→ Verify
+→ Record
 ```
 
-## Three paths through each chapter
+- **Problem：** 我们正在解决什么真实问题？
+- **Behaviour contract：** 从外部能观察到什么？
+- **Red：** 测试先为正确原因失败。
+- **Green：** 只加入足够让行为成立的代码。
+- **Refactor：** 测试保持绿色时改善结构。
+- **Verify：** 运行聚焦测试和累计检查。
+- **Record：** 记录选择、证据、限制和未完成部分。
 
-- **Build / 构建:** make the next behaviour work
-- **Understand / 理解:** learn the Rust idea and its trade-offs
-- **Source read / 源码阅读:** compare with pinned production code
+### 章节阅读顺序
 
-## Nine questions for every major idea
+```text
+Big picture
+→ Concept
+→ Product goal
+→ See it run
+→ Read the code
+→ TDD story
+→ Why Rust
+→ Try it
+→ Verify
+→ Next step
+```
 
-- What problem are we solving?
-- How do other languages solve it?
-- What did Rust choose?
-- Why did Rust choose it?
-- What do we gain?
-- What does it cost?
-- Which engineering principle does it teach?
-- What does it add to the harness?
-- Which test proves it?
+读者先知道这一章要解决什么，认识必要概念，再看到一个可运行结果。代码和 TDD 过程放在有上下文的位置，而不是一打开章节就面对失败日志和密集类型。
 
-## AI-native engineering loop
+## 每章的阅读节奏 / The chapter rhythm
 
-- Ask AI for options, not a final truth.
-- List the assumptions.
-- Check official documentation.
-- Read the relevant source and tests.
-- Predict the failure.
-- Run the test.
-- Review the diff.
-- Check failure, cancellation, and security paths.
-- Record the decision and remaining uncertainty.
+### 1. 从高处看全局
 
-## Difficulty policy
+用几段话回答：
 
-- Preview advanced syntax only when it helps the reader run a useful whole.
-- Label previews clearly.
-- Return later for the full explanation.
-- Prefer one new hard idea per chapter.
-- Keep the default path offline and deterministic.
+- 我们正在建设什么产品？
+- 这一章在整条路线中的位置是什么？
+- 今天解决的问题为什么值得解决？
+
+### 2. 先讲概念
+
+概念解释从意义开始，不从语法定义开始。
+
+例如，不要先说“`enum` 的语法是……”。先说：
+
+> 一次回合可能处于不同状态，但同一时刻只能是其中一种。我们需要一种类型，把这些可能性清楚地列出来。
+
+然后才介绍 Rust 的 `enum`。
+
+### 3. 先看结果
+
+给出一条真实命令和真实输出。
+
+读者应该先知道“完成以后会发生什么”，再阅读实现细节。结果不是营销截图，而是由测试保护的公开行为。
+
+### 4. 分层读代码
+
+每次只解释一层：
+
+- 这一段负责什么；
+- 输入和输出是什么；
+- 为什么放在这里；
+- 暂时不用理解哪些语法；
+- 想深入时去哪里查官方资料。
+
+不逐字翻译每一行。代码本身必须来自已测试源码。
+
+### 5. 回看 TDD 过程
+
+当读者已经知道概念、结果和代码后，再回看它怎样长出来：
+
+```text
+先写一个小测试
+→ 确认它为正确原因失败
+→ 做最小改动
+→ 重新运行全部相关测试
+→ 去掉重复和坏味道
+```
+
+TDD 不是表演红灯，也不是先把完整答案藏起来。它的重点是缩短反馈距离，让每一步都容易判断、容易撤回。
+
+### 6. 亲手修改
+
+每章给一个小而明确的实验，例如：
+
+- 改一个输入；
+- 改一个预期输出；
+- 故意破坏事件顺序；
+- 运行一个聚焦测试；
+- 修复后再跑累计测试。
+
+练习要帮助理解当前概念，不用题目数量堆满章节。
+
+## 三条阅读路线 / Three paths
+
+读者可以按时间选择：
+
+### Build / 构建
+
+- 阅读概念和产品目标；
+- 运行命令；
+- 完成最小修改；
+- 跑聚焦测试。
+
+### Understand / 理解
+
+在 Build 基础上继续：
+
+- 阅读 Rust 为什么这样设计；
+- 比较其他语言；
+- 理解错误和边界；
+- 完成思考题。
+
+### Source Read / 源码阅读
+
+在前两条路线之上继续：
+
+- 阅读固定版本的 Codex 路径；
+- 同时阅读生产代码和测试；
+- 区分来源事实与本书决定；
+- 记录教学实现为何不同。
+
+三条路线最后都回到同一个可验证的 Harness。
+
+## 九个问题 / Nine questions
+
+每个重要设计至少回答：
+
+1. 我们要解决什么问题？
+2. 这个概念在软件工程中是什么意思？
+3. 其他语言或系统怎样处理？
+4. Rust 选择了什么？
+5. Rust 为什么这样选择？
+6. 我们得到什么？
+7. 我们付出什么？
+8. 它怎样改善当前 Harness？
+9. 哪条测试或运行结果支持这个结论？
+
+## 困难概念的处理 / Difficulty policy
+
+- 一章尽量只引入一个真正困难的新概念。
+- 可以提前使用以后才深入解释的语法，但必须标明“现在只需要知道什么”。
+- 第一次理解不完整是正常的。后续章节会带着更真实的问题重新回来。
+- 不用“显然”“简单”“只要”掩盖知识跳跃。
+- 不要求初学者为了避免 `clone` 而过早设计复杂生命周期。
+- 不把异步、Trait、泛型和宏一次塞进第一个项目。
+- 默认路径保持离线、确定、可重复。
+
+[Rust 官方 2026 年的学习研究](https://blog.rust-lang.org/2026/06/25/vision-doc-journeys-to-learning-rust/)显示，很多学习者需要多次、用不同形式重新接触同一个主题；学习 Rust 也常常意味着放下一部分其他语言带来的直觉。章节设计应该容许这种来回，而不是假设一次讲完就永久掌握。
+
+## 官方资料怎样使用 / Official references
+
+本书不是 Rust Reference 的替代品。
+
+每章在相关代码旁提供少量精确链接：
+
+- *The Rust Programming Language*：学习语言概念；
+- Standard Library docs：查询具体类型和方法；
+- Cargo Book：查询项目、依赖和工具行为；
+- rustup book：查询工具链选择；
+- 固定版本的 Codex 源码：学习真实工程组织。
+
+正文负责建立心智模型。官方资料负责让读者继续查证和深入。
+
+## AI-native 工程循环
+
+```text
+让 AI 提供候选方案
+→ 写下它的假设
+→ 查官方资料
+→ 阅读相关源码和测试
+→ 预测应出现的失败
+→ 运行测试
+→ 审查 diff
+→ 检查失败、安全和边界路径
+→ 记录决定与不确定性
+```
+
+禁止把“AI 输出很完整”当作正确性的证据。
+
+## 每章结束时的自问
+
+- 我现在能亲手运行什么？
+- 我能用自己的话解释哪个概念？
+- 我知道哪一部分还不懂吗？
+- 哪个测试保护了本章行为？
+- 这次设计的代价是什么？
+- 下一章会在它上面加什么？
+
+能清楚说出“我还不知道什么”，也是学习进展。

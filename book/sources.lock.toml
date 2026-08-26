@@ -1,5 +1,5 @@
 schema_version = 1
-reviewed_at = "2026-08-24"
+reviewed_at = "2026-08-25"
 
 [rust]
 toolchain = "1.98.0"
@@ -48,3 +48,39 @@ rights = "reference only; do not copy prose, diagrams, or exercises"
 id = "codex-app-server"
 url = "https://developers.openai.com/codex/app-server"
 role = "public thread, turn, item, and lifecycle concepts"
+
+
+[[technical_reference]]
+id = "rust-learning-journeys-2026"
+url = "https://blog.rust-lang.org/2026/06/25/vision-doc-journeys-to-learning-rust/"
+role = "Learner paths, repeated exposure, prior-language unlearning, and compiler feedback"
+
+[[technical_reference]]
+id = "rust-1-98-release"
+url = "https://blog.rust-lang.org/2026/08/20/Rust-1.98.0/"
+role = "Chapter 1 stable toolchain baseline"
+
+[[technical_reference]]
+id = "rustup-toolchain-file"
+url = "https://rust-lang.github.io/rustup/overrides.html#the-toolchain-file"
+role = "Chapter 1 exact toolchain and component pinning"
+
+[[technical_reference]]
+id = "cargo-workspaces"
+url = "https://doc.rust-lang.org/cargo/reference/workspaces.html"
+role = "Chapter 1 workspace, shared output, and lockfile behaviour"
+
+[[technical_reference]]
+id = "cargo-resolver"
+url = "https://doc.rust-lang.org/cargo/reference/resolver.html#resolver-versions"
+role = "Chapter 1 resolver 3 and MSRV-aware dependency selection"
+
+[[technical_reference]]
+id = "cargo-locked"
+url = "https://doc.rust-lang.org/cargo/commands/cargo-build.html#manifest-options"
+role = "Chapter 1 locked verification semantics"
+
+[[technical_reference]]
+id = "mdbook-includes"
+url = "https://rust-lang.github.io/mdBook/format/mdbook.html#including-files"
+role = "Tested source inclusion and anchors"

@@ -47,7 +47,7 @@ jobs:
         with:
           typst-version: "0.15.1"
 
-      - name: Install CJK fonts for the PDF smoke build
+      - name: Install CJK fonts for the PDF build
         run: |
           sudo apt-get update
           sudo apt-get install --yes fonts-noto-cjk
@@ -73,5 +73,5 @@ jobs:
       - name: Build HTML book
         run: make book-build
 
-      - name: Build PDF shell
+      - name: Render canonical Markdown and build full PDF
         run: make pdf

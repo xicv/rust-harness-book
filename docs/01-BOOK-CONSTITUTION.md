@@ -1,48 +1,161 @@
 # Book constitution / 本书章程
 
-## Purpose / 目的
+## 我们为什么写这本书 / Why this book exists
 
-Teach modern Rust as a way to think about software, not as a list of syntax.
-The reader builds one real local agent harness and learns how to design, test,
-review, and verify software in the AI-native era.
+这不是一本把 Rust 语法从头列到尾的参考手册。
 
-## Reader / 读者
+它是一段真实的学习和构建过程。我们会一边学习 Rust，一边完成同一个产品：一个可以在本地运行、可以测试、可以解释，也可以逐步验证的 **智能体运行框架** *Agent Harness*。
 
-- Has used at least one programming language
-- May be new to Rust
-- Wants practical engineering skills, not trivia
-- Learns by running, changing, and testing code
-- Is allowed to be confused and revisit a topic later
+我们不假装自己已经懂得所有答案。作者也是学习者。遇到难点时，我们会把问题拆开，查看官方文档，阅读真实源码，做一个小实验，再用测试确认自己的理解。
 
-The author is also a learner. The book must never pretend that difficult ideas
-are obvious.
+本书真正想训练的，不只是“会写 Rust”，而是四种更长期的能力：
 
-## Core promises / 核心承诺
+- 看懂一个陌生的软件系统；
+- 把模糊需求变成清楚的类型和边界；
+- 在多个方案之间做有根据的选择；
+- 用编译器、测试、源码和运行结果验证 AI 或人写出的代码。
 
-- **Why first:** problem → other languages → Rust choice → trade-off
-- **One growing product:** every chapter improves the same harness
-- **TDD throughout:** behaviour is protected before implementation
-- **Evidence over confidence:** compiler, tests, traces, docs, and source
-- **Fair comparison:** use modern forms of other languages
-- **Simple writing:** short, clear, and practical
-- **Bilingual terms:** Chinese and canonical English together
-- **Living book:** versions and source pins are machine-readable
+## 我们要完成什么 / The product we are building
 
-## Non-goals / 非目标
+全书只构建一个持续成长的项目。
 
-- An exhaustive Rust language reference
-- A full clone of Codex
-- A production-grade OS sandbox
-- A catalogue of popular crates
-- A language-war argument
-- A book where readers copy code without understanding evidence
+开始时，它只是一个离线 Echo 回合。完成全书时，它会成长为一个真实的本地 Agent Harness，具备：
 
-## Definition of success / 成功标准
+- Thread、Turn 和 Item 生命周期；
+- 模型调用与流式事件；
+- 工具路由；
+- 权限与人工审批；
+- 取消、超时和背压；
+- 持久化、恢复和重放；
+- 上下文预算；
+- JSONL app server 和 CLI；
+- 确定性测试、离线评测和发布证据。
 
-A reader finishes with:
+它不会冒充 Codex，也不会声称拥有生产级操作系统沙箱。我们会学习 Codex 的公开架构和源码，但教学实现保持原创、精简，并清楚标明没有实现的部分。
 
-- a working local agent harness;
-- a tested mental model of Rust ownership, types, async, and concurrency;
-- stronger API and architecture judgement;
-- a repeatable way to verify AI-generated code;
-- confidence reading a large Rust codebase.
+## 我们怎样学习 / How we learn
+
+我们不要求先把 Rust 全部学懂，才有资格开始。
+
+相反，我们先得到一个小而完整、真的能运行的版本。看到结果之后，再逐层拆开：
+
+```text
+完整运行
+  ↓
+理解概念
+  ↓
+读懂代码
+  ↓
+修改行为
+  ↓
+用测试验证
+  ↓
+回到更深一层
+```
+
+这是一种螺旋式学习。第一次遇到 `enum`，我们只理解它为什么适合表达事件。到后面的状态机章节，再深入模式匹配、所有权和穷尽检查。难点可以先用起来，再回来真正吃透。
+
+## 两种顺序要分开 / Reading order is not development order
+
+这是本书最重要的编辑原则之一。
+
+**代码的开发顺序**仍然是：
+
+```text
+问题 → 行为契约 → Red → Green → Refactor → Verify
+```
+
+**读者的阅读顺序**则是：
+
+```text
+全局目的 → 概念 → 本章产品目标 → 先看运行结果
+→ 拆开代码 → 回看 TDD 过程 → 理解 Rust 设计
+→ 自己动手 → 验证与总结
+```
+
+TDD 是代码长出来的方法，不应该变成挡在读者面前的第一堵墙。读者先知道“我们在做什么、为什么值得做”，再看测试怎样保护这个设计，会更自然。
+
+## 核心承诺 / Core promises
+
+- **概念先行：** 先解释问题和概念，再展示结果和代码。
+- **一个成长中的产品：** 每章都让同一个 Harness 前进一步。
+- **TDD 贯穿全书：** 每项真实行为都有先失败、再通过、再重构的证据。
+- **为什么比是什么重要：** 解释 Rust 的选择、收益、代价和替代方案。
+- **证据高于自信：** 编译器、测试、运行结果、官方文档和固定源码才是依据。
+- **学习者视角：** 不使用“这很显然”“这很简单”来压过真实困惑。
+- **公平比较：** 使用其他语言的现代做法，不靠贬低别的语言突出 Rust。
+- **代码必须是真的：** 展示的 Rust 来自可运行、可测试的源码。
+- **中英术语并列：** 第一次出现的重要术语同时给出中文和标准英文。
+- **同一内容，多种输出：** canonical Markdown 同时生成 HTML 和 PDF。
+- **版本可追踪：** Rust、工具、Codex 源码和依赖版本都可查询、可复现。
+
+## AI-native 学习方式 / Learning with AI
+
+AI 可以帮我们：
+
+- 提出候选方案；
+- 解释编译错误；
+- 搜索可能相关的源码；
+- 生成测试草稿；
+- 审查边界情况。
+
+但 AI 的回答不是结论。
+
+每次接受一段 AI 生成的代码之前，我们都要问：
+
+- 它假设了什么？
+- 它改变了哪些公开行为？
+- 哪个测试能证明它？
+- 哪个失败路径还没有覆盖？
+- 官方文档和真实源码是否支持它？
+- 是否加入了目前根本不需要的复杂度？
+
+AI 给出候选答案。工程证据决定我们是否采用。
+
+## 每章应该给读者什么 / What every chapter delivers
+
+每章至少交付：
+
+- 一个容易理解的概念；
+- 一个清楚的产品目标；
+- 一个可以亲手运行的结果；
+- 一组从真实源码引用的代码；
+- 一段可追踪的 Red → Green → Refactor 过程；
+- 一个“为什么 Rust 这样设计”的解释；
+- 一个公平的语言或工程方案比较；
+- 一个自己可以修改的小练习；
+- 一份验证命令和已知限制；
+- 一个对 Harness 的真实增量。
+
+## 非目标 / Non-goals
+
+本书不是：
+
+- Rust 所有语法的百科全书；
+- 对两本参考书的改写或逐章复制；
+- Codex 的完整克隆；
+- 生产级沙箱安全证明；
+- 热门 crate 清单；
+- 语言优劣大战；
+- 让读者无脑复制代码的速成教程；
+- 用测试数量或覆盖率制造安全感的宣传材料。
+
+## 成功标准 / Definition of success
+
+读完后，读者应该得到两样东西。
+
+第一，一个真实、可运行、可验证的本地 Agent Harness。
+
+第二，一套可以带到任何语言和项目中的工程方法：
+
+```text
+先弄清问题
+→ 建立概念模型
+→ 设计可观察行为
+→ 小步实现
+→ 用证据验证
+→ 在安全网下重构
+→ 清楚记录边界
+```
+
+如果我们最后只写出了一个程序，却没有变得更会思考、更会判断、更会验证，这本书就还没有成功。

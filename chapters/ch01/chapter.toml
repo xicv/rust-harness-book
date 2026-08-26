@@ -1,0 +1,27 @@
+id = "ch01"
+title_zh = "工具链就是证据"
+title_en = "The Toolchain Is Evidence"
+status = "completed"
+
+[rust]
+concepts = ["rustup toolchains", "Cargo workspaces", "Edition 2024", "resolver 3", "lockfiles"]
+
+[engineering]
+principles = ["reproducibility", "configuration as code", "evidence before assumption"]
+
+[harness]
+adds = ["read-only toolchain doctor", "locked cumulative verification"]
+
+[research]
+codex_paths = [
+    "codex-rs/Cargo.toml",
+    "AGENTS.md",
+]
+
+[verification]
+offline = true
+required_tests = [
+    "doctor_reports_pinned_and_active_toolchain",
+    "cli_prints_ordered_events",
+    "one_prompt_produces_ordered_events",
+]

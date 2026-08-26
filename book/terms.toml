@@ -36,7 +36,28 @@ introduced_in = "ch00"
 id = "test-driven-development"
 zh = "测试驱动开发"
 en = "Test-Driven Development (TDD)"
-introduced_in = "ch02"
+introduced_in = "ch00"
+note = "Chapter 0 uses the cycle; Chapter 2 explains the method in depth."
+
+
+[[term]]
+id = "newtype-pattern"
+zh = "新类型模式"
+en = "Newtype Pattern"
+introduced_in = "ch00"
+note = "Previewed in Chapter 0 and explained in depth in Chapter 5."
+
+[[term]]
+id = "functional-core-imperative-shell"
+zh = "函数式核心、命令式外壳"
+en = "Functional Core, Imperative Shell"
+introduced_in = "ch00"
+
+[[term]]
+id = "black-box-test"
+zh = "黑盒测试"
+en = "Black-Box Test"
+introduced_in = "ch00"
 
 [[term]]
 id = "ownership"
@@ -116,3 +137,53 @@ id = "evaluation"
 zh = "评测"
 en = "Evaluation"
 introduced_in = "ch34"
+
+[[term]]
+id = "toolchain"
+zh = "工具链"
+en = "Toolchain"
+introduced_in = "ch01"
+
+[[term]]
+id = "workspace"
+zh = "工作空间"
+en = "Workspace"
+introduced_in = "ch01"
+
+[[term]]
+id = "msrv"
+zh = "最低支持 Rust 版本"
+en = "Minimum Supported Rust Version (MSRV)"
+introduced_in = "ch01"
+
+[[term]]
+id = "lockfile"
+zh = "锁文件"
+en = "Lockfile"
+introduced_in = "ch01"
+
+
+[[term]]
+id = "rust-edition"
+zh = "Rust 版本代际"
+en = "Rust Edition"
+introduced_in = "ch01"
+
+[[term]]
+id = "dependency-resolver"
+zh = "依赖解析器"
+en = "Dependency Resolver"
+introduced_in = "ch01"
+
+[[term]]
+id = "crate"
+zh = "编译单元"
+en = "Crate"
+introduced_in = "ch01"
+note = "Keep the Rust word Crate visible in code-facing explanations."
+
+[[term]]
+id = "reproducibility"
+zh = "可复现性"
+en = "Reproducibility"
+introduced_in = "ch01"

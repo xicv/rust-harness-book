@@ -16,6 +16,12 @@ The book and the code are one cumulative project.
 - Every shown Rust block must be runnable, compile-only, compile-fail, or clearly
   labelled pseudocode.
 - Prefer code includes from tested files. Do not duplicate code manually in prose.
+- When a concept can be expressed honestly as one self-contained file, provide an
+  editable browser Playground sourced from a checked file.
+- Do not force workspace, multi-file, file-system, process, or local-crate behavior
+  into a misleading Playground example. Use a project lab instead.
+- Treat online Playground runs as learning feedback, not release evidence. Pinned
+  local tests and CI remain authoritative.
 - Default tests must be deterministic and offline.
 - A live model test never replaces a deterministic harness test.
 - Explain why a design exists, its trade-offs, and where another language may win.
@@ -58,7 +64,7 @@ The book and the code are one cumulative project.
 7. Add edge and negative tests.
 8. Compare with pinned Codex source.
 9. Record trade-offs and limits.
-10. Verify code, HTML, PDF source, glossary, links, and the chapter receipt.
+10. Verify code, inline labs, HTML, PDF source, glossary, links, and the chapter receipt.
 
 ## Writing style
 
