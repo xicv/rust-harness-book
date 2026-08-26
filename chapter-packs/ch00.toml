@@ -1,0 +1,43 @@
+schema = 1
+chapter = "ch00"
+source_commit = "3fed46defa0189e4e1a8f5b7dc3ab61743209b08"
+archive_name = "rust-harness-ch00.zip"
+root_directory = "rust-harness-ch00"
+
+source_paths = [
+    "Cargo.lock",
+    "Cargo.toml",
+    "rust-toolchain.toml",
+    "crates/harness-cli/Cargo.toml",
+    "crates/harness-cli/src/main.rs",
+    "crates/harness-cli/src/render.rs",
+    "crates/harness-cli/tests/cli.rs",
+    "crates/harness-core/Cargo.toml",
+    "crates/harness-core/src/lib.rs",
+    "crates/harness-core/tests/turn_flow.rs",
+    "crates/harness-test-support/Cargo.toml",
+    "crates/harness-test-support/src/lib.rs",
+]
+
+[[generated_files]]
+source = "chapter-packs/ch00/README.md"
+destination = "README.md"
+
+[[generated_files]]
+source = "chapter-packs/ch00/VERIFYING.md"
+destination = "VERIFYING.md"
+
+[[generated_files]]
+source = "chapter-packs/ch00/expected-output.txt"
+destination = "expected-output.txt"
+
+[[generated_files]]
+source = "LICENSE"
+destination = "LICENSE"
+
+[[commands]]
+argv = ["cargo", "test", "--workspace", "--locked"]
+
+[[commands]]
+argv = ["cargo", "run", "-p", "harness-cli", "--locked", "--", "hello"]
+expected_stdout = "expected-output.txt"

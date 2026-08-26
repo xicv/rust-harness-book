@@ -4,7 +4,8 @@ Reviewed: **2026-08-25**
 
 ## Decision
 
-**Go: Chapters 0 and 1 and the dual-output publishing foundation are complete. Chapter 2 is the next valid milestone.**
+**Go: Chapters 0 and 1 and the HTML/PDF foundation are complete on `main`. The
+reader-delivery milestone must be reviewed and merged before Chapter 2 starts.**
 
 The initial architecture and editorial contracts remain stable. Research now
 continues in small, chapter-specific passes before each new implementation.
@@ -27,21 +28,28 @@ continues in small, chapter-specific passes before each new implementation.
 - A standard-library-only `book-render` tool that generates Typst from the
   canonical Markdown source
 - Full HTML and PDF content parity for completed Chapters 0 and 1
+- Deterministic local GitBook export from the strict canonical Markdown parser
+- Reproducible Chapter 0 and Chapter 1 code packs from pinned historical commits
 
-## Publishing research now implemented
+## Reader-delivery research now implemented locally
 
 The publishing pipeline uses one editable prose source:
 
 ```text
 book/src/**/*.md
-        ├── mdBook → dist/html/
-        └── book-render → dist/typst/book.typ
-                              └── Typst → dist/rust-harness-book.pdf
+        ├── mdBook → dist/html/ → GitHub Pages
+        ├── book-render → dist/gitbook/ → gitbook-publish → GitBook
+        └── book-render → dist/typst/book.typ → PDF
 ```
 
-`SUMMARY.md` controls order. Tested source includes are expanded for both output
+`SUMMARY.md` controls order. Tested source includes are expanded for all output
 paths. Unsupported HTML, path escapes, recursive includes, and remote images fail
 closed.
+
+Completed chapter packs are independently rebuilt from their exact reviewed Git
+commits, checksummed, unpacked, and exercised offline. Repository code can
+prepare the Pages artifact and GitBook branch, but enabling Pages, connecting a
+GitBook space, publishing it, and visiting both live sites remain manual gates.
 
 ## Research that continues chapter by chapter
 

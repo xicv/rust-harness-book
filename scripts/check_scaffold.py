@@ -117,7 +117,9 @@ def summary_chapter_targets() -> list[tuple[str, Path]]:
         resolved = (summary.parent / target).resolve()
         if not resolved.is_file():
             fail(f"SUMMARY target does not exist: {target}")
-        if resolved.name != "index.md":
+        relative_target = resolved.relative_to(summary.parent)
+        is_reader_resource = relative_target.parts[0].startswith("_")
+        if resolved.name != "index.md" and not is_reader_resource:
             targets.append((label, resolved))
     paths = [path for _, path in targets]
     if len(paths) != len(set(paths)):

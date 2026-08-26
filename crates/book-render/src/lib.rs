@@ -1,5 +1,5 @@
 #![forbid(unsafe_code)]
-#![doc = "Canonical Markdown-to-Typst renderer for the Rust book."]
+#![doc = "Strict canonical Markdown renderer for the Rust book's publication outputs."]
 
 use std::collections::{HashMap, HashSet};
 use std::error::Error;
@@ -345,6 +345,7 @@ pub fn render(request: &RenderRequest) -> Result<RenderReport, RenderError> {
 }
 
 include!("render_typst.rs");
+include!("render_gitbook.rs");
 include!("markdown.rs");
 include!("includes.rs");
 include!("config.rs");

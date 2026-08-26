@@ -56,6 +56,13 @@ cannot install the toolchain locally.
 
 Project labs remain the source of release evidence.
 
+Every completed chapter also publishes a verified code pack representing the
+exact reviewed workspace at that chapter boundary. This is the preferred reader
+starting point when the current repository has already moved ahead. The ZIP,
+SHA-256 sidecar, source commit, and clean-directory commands are linked from the
+chapter page. Browser Playground output still does not replace that pinned
+workspace evidence.
+
 ## Level 3 — Notebook lab / Notebook 实验
 
 Evcxr provides a Rust REPL and a Jupyter kernel. It is useful for longer

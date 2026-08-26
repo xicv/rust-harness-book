@@ -19,6 +19,7 @@ RENDERER_SOURCE_FILES = (
     "crates/book-render/src/markdown_inline.rs",
     "crates/book-render/src/markdown_parser.rs",
     "crates/book-render/src/paths.rs",
+    "crates/book-render/src/render_gitbook.rs",
     "crates/book-render/src/render_typst.rs",
 )
 
@@ -84,6 +85,7 @@ def check_workspace() -> None:
     for path in RENDERER_SOURCE_FILES + (
         "crates/book-render/tests/render_contract.rs",
         "crates/book-render/tests/book_pipeline.rs",
+        "crates/book-render/tests/gitbook_export.rs",
     ):
         read(path)
 
@@ -135,6 +137,7 @@ def check_contract() -> None:
     required_capabilities = (
         "pub fn render_markdown",
         "pub fn render(request: &RenderRequest)",
+        "pub fn export_gitbook",
         "parse_summary",
         "rustdoc_include",
         "recursive include detected",
