@@ -58,6 +58,15 @@ command = ["cargo", "test", "-p", "harness-cli", "--test", "cli", "--locked", "c
 offline = true
 
 [[example]]
+id = "ch00-inline-playground"
+chapter = "ch00"
+kind = "playground"
+source = "book/src/_labs/00-first-playground.rs"
+anchor = "first_inline_playground"
+command = ["mdbook", "test", "book", "-L", "target/debug/deps"]
+offline = true
+
+[[example]]
 id = "ch01-toolchain-report"
 chapter = "ch01"
 kind = "black-box-support"

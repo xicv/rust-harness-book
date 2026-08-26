@@ -80,6 +80,23 @@ examples: []
 
 ## 自己动手 / Try it
 
+### 浏览器即时实验 / Inline Playground
+
+如果概念可以诚实地缩成一个独立文件，加入：
+
+````markdown
+```rust,editable,edition2024
+{{#rustdoc_include path/to/lab.rs:anchor}}
+```
+````
+
+说明要改哪一行、观察什么，并写清 Playground 的版本和隐私边界。
+
+如果真实行为依赖 Workspace、本地 crate、文件、进程或固定依赖，则不要伪造
+Playground 版本。改用 Project lab，并说明原因。
+
+### 完整工程实验 / Project lab
+
 - 聚焦命令
 - 小实验
 - 可选深入练习

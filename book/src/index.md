@@ -70,6 +70,42 @@ Rust 值得学，不只是因为它运行快。
 
 所以这本书允许我们回头，允许我们先做后懂，也允许我们清楚地说：“这一部分我现在还不知道。”
 
+## 随手运行 Rust / Run it as you read
+
+读代码最直观的方法，不是只看，而是马上改一点，再看看结果怎样变化。
+
+这本书的 HTML 版本会为适合单文件运行的例子提供 **即时实验** <span class="term-en">Interactive Lab</span>：
+
+1. 直接修改代码；
+2. 点击运行按钮；
+3. 在代码下面查看输出；
+4. 点击撤销，回到原来的版本。
+
+先试一下。把 `"hello"` 改成你的名字，或者把 `"Echo:"` 改成另一段文字，然后重新运行。
+
+```rust,editable,edition2024
+{{#rustdoc_include _labs/00-first-playground.rs:first_inline_playground}}
+```
+
+这段代码是一个为了浏览器实验而缩小的生命周期模型，不是生产 Harness 的第二份实现。它保留五个事件，让我们可以直观看到“改输入、改输出、改顺序”会发生什么。
+
+<div class="learning-card">
+<p class="card-label">Playground 边界 / Playground limits</p>
+
+浏览器实验很方便，但它不是本书的最终验证证据：
+
+- 点击运行会把这段代码发送到 Rust Playground；
+- Playground 使用读者访问时的 stable Rust，不保证永远等于本书固定的 Rust `1.98.0`；
+- Playground 内运行的程序没有外部网络，并受到时间和内存限制；
+- 它只适合单文件例子，也不能引用本仓库的本地 crate；
+- 不要把密码、API key、私人代码或公司代码贴进在线 Playground。
+
+本书固定版本的 Cargo 测试和 CI 仍然是发布证据。完整 Harness、跨 crate 测试和文件系统实验要在本地项目中运行。详细规则见 [`docs/15-INTERACTIVE-LABS.md`](https://github.com/xicv/rust-harness-book/blob/main/docs/15-INTERACTIVE-LABS.md)。
+
+</div>
+
+这和 Jupyter Notebook 的学习感觉相近：改一小段，立刻看反馈。不同的是，Rust Playground 适合独立小例子；需要保持多段状态或操作完整 Workspace 时，我们会使用本地 Cargo、浏览器云开发环境，或可选的 Evcxr Jupyter lab。
+
 ## 每章怎样展开
 
 章节的阅读顺序会保持自然：
