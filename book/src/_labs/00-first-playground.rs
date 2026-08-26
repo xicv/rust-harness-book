@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 // ANCHOR: first_inline_playground
 #[derive(Debug)]
 enum Event {
