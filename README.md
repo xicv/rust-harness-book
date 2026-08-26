@@ -38,6 +38,9 @@ educational agent harness built throughout it.
   packs and a generated GitBook-compatible Markdown mirror. These local
   artifacts are verified; hosted Pages and GitBook availability remain separate
   post-merge checks.
+- Every standalone reader edition carries the complete original-book MIT notice
+  from the repository-root `LICENSE-BOOK`; the canonical book page includes that
+  file rather than copying it.
 
 Start here:
 
@@ -102,7 +105,9 @@ first be configured to use GitHub Actions as its Pages source, and a successful
 deployment must be visited before the URL is described as live.
 
 GitBook is a secondary renderer. The workflow regenerates `dist/gitbook/` only
-from verified `main` and updates `gitbook-publish` without force-pushing.
+from verified `main` in a read-only job, uploads the checked inert output, and
+updates `gitbook-publish` in a separate write-scoped transport job without
+executing publication-branch code or force-pushing.
 Connecting that branch to a GitBook space, choosing the project directory, and
 publishing the space remain manual account-side steps. GitBook does not provide
 the mdBook inline Playground experience; its generated Introduction links back

@@ -40,6 +40,11 @@ the strict SUMMARY parser, include expander, Markdown AST, raw-HTML allowlist,
 and project-root containment checks. GitBook is therefore generated output, not
 a hand-maintained second prose copy.
 
+The reader-resources section includes `book/src/_delivery/book-license.md`.
+That page includes the repository-root `LICENSE-BOOK`, so HTML, GitBook,
+generated Typst, and PDF carry the same complete original-book MIT notice
+without maintaining a second licence-text copy.
+
 ## HTML
 
 mdBook is the production HTML renderer because it provides:
@@ -90,9 +95,15 @@ unknown raw HTML. The Introduction keeps a visible link to the authoritative
 interactive Pages edition because GitBook does not reproduce the inline Rust
 Playground controls.
 
-Generated `dist/gitbook/` is ignored on `main`. After the exact `main` reader
-build succeeds, a separate write-scoped job merges that reviewed commit into
-`gitbook-publish`, regenerates the mirror, and performs a normal non-force push.
+Generated `dist/gitbook/` is ignored on `main`. The exact `main` build runs with
+read-only repository permission and no persisted checkout credentials. It
+generates and verifies the mirror, records the reviewed SHA and a SHA-256 file
+manifest, and uploads only inert publication data. A separate write-scoped job
+downloads that immutable artifact by ID, verifies its digest, provenance, and
+file manifest, then replaces only `.gitbook.yaml` and the generated `dist/` tree on
+`gitbook-publish`. It never runs publication-branch code or merges that mutable
+branch into reviewed source. The push is normal and non-force, so a concurrent
+GitBook edit causes a non-fast-forward failure instead of an automatic merge.
 Pull-request jobs never receive that write scope.
 
 GitBook still needs account-side setup:
@@ -174,6 +185,11 @@ It fails closed for:
 - malformed tables, links, cards, fences, or metadata;
 - chapter sources that do not match `SUMMARY.md`.
 
+Both renderer entry points also reject an output that contains, equals, or is
+contained by the canonical book, book source, Typst template, or Git control
+path. This disjointness check runs before any output parent, staging path,
+backup, rename, or deletion is created.
+
 A newly needed Markdown feature starts with a focused failing test. Silently
 removing content is never an acceptable fallback.
 
@@ -202,10 +218,13 @@ make chapter-packs
 ```
 
 `chapter-pack` requires the pinned commit to exist locally and to be an ancestor
-of the current reviewed tree. It accepts only regular Git blobs, writes sorted
-stored ZIP entries with fixed metadata, publishes a SHA-256 sidecar, safely
-unpacks the result into a fresh directory, compares every byte, and runs the
-declared commands with `CARGO_NET_OFFLINE=true`.
+of the current reviewed tree. It accepts only regular Git blobs and writes
+sorted stored ZIP entries with an explicit Unix creator system, fixed 1980
+timestamp, and regular-file mode. It creates the archive and SHA-256 sidecar in
+a temporary sibling directory, safely unpacks and verifies them, compares every
+byte, and runs the declared commands with `CARGO_NET_OFFLINE=true` before
+renaming either artifact to its final name. Failed verification therefore does
+not publish a partial final-named pack.
 
 Chapter 0 is exported from
 `3fed46defa0189e4e1a8f5b7dc3ab61743209b08`; Chapter 1 is exported from
@@ -215,6 +234,17 @@ from leaking backwards into an earlier learner pack.
 A passing pack build proves those declared commands and exact outputs worked in
 the verification environment. It does not prove every learner machine, target,
 or optional tool will behave identically.
+
+## Recorded publishing limits
+
+- GitBook link and image destinations containing spaces or parentheses do not
+  yet have focused escaping coverage. Do not introduce such local publication
+  paths until a dedicated renderer test and escaping rule are added.
+- Archive metadata and separate-directory byte equality are deterministic tests,
+  but the workflow does not yet compare one chapter archive across Windows and
+  Unix runners. Add that focused matrix when the extra runner cost is justified.
+- Compiled-PDF licence verification uses Poppler text extraction in hosted CI;
+  PDF appearance still requires the recorded human visual check.
 
 ## Visual rules
 

@@ -3,8 +3,11 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+from html.parser import HTMLParser
 from pathlib import Path
 import re
+import shutil
+import subprocess
 import sys
 import tomllib
 from urllib.parse import unquote
@@ -16,6 +19,15 @@ PACKS = {
     "ch00": ("3fed46defa0189e4e1a8f5b7dc3ab61743209b08", "rust-harness-ch00.zip"),
     "ch01": ("decef67c89afba8e4eb095b0c16454e4aca97eb5", "rust-harness-ch01.zip"),
 }
+
+
+class VisibleTextParser(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__()
+        self.fragments: list[str] = []
+
+    def handle_data(self, data: str) -> None:
+        self.fragments.append(data)
 
 
 def fail(message: str) -> None:
@@ -51,6 +63,26 @@ def require_fragments(relative: str, fragments: tuple[str, ...]) -> None:
             fail(f"{relative} is missing required delivery evidence: {fragment}")
 
 
+def normalize_text(source: str) -> str:
+    return " ".join(source.split())
+
+
+def require_complete_book_licence(label: str, source: str) -> None:
+    licence = normalize_text(read("LICENSE-BOOK"))
+    if licence not in normalize_text(source):
+        fail(f"{label} does not contain the complete LICENSE-BOOK notice")
+
+
+def typst_string(value: str) -> str:
+    return (
+        value.replace("\\", "\\\\")
+        .replace('"', '\\"')
+        .replace("\r", "\\r")
+        .replace("\n", "\\n")
+        .replace("\t", "\\t")
+    )
+
+
 def check_licences() -> None:
     for relative in ("LICENSE", "LICENSE-BOOK"):
         source = read(relative)
@@ -61,6 +93,15 @@ def check_licences() -> None:
     require_fragments(
         "docs/08-SOURCE-AND-RIGHTS-POLICY.md",
         ("`LICENSE`", "`LICENSE-BOOK`", "Third-party"),
+    )
+    licence_page = read("book/src/_delivery/book-license.md")
+    if "{{#include ../../../LICENSE-BOOK}}" not in licence_page:
+        fail("the book licence page must include the root LICENSE-BOOK file")
+    if normalize_text(read("LICENSE-BOOK")) in normalize_text(licence_page):
+        fail("the book licence page must not copy the LICENSE-BOOK notice")
+    require_fragments(
+        "book/src/SUMMARY.md",
+        ("[Book license / 本书许可](_delivery/book-license.md)",),
     )
 
 
@@ -75,6 +116,8 @@ def check_pack_contract() -> None:
             "pub fn build_and_verify",
             "source_commit is not an ancestor of HEAD",
             "CompressionMethod::Stored",
+            "SimpleFileOptions::DEFAULT",
+            "System::Unix",
             "CARGO_NET_OFFLINE",
             "enclosed_name",
         ),
@@ -151,10 +194,17 @@ def check_workflows() -> None:
         "branches: [main]",
         "contents: read",
         "fetch-depth: 0",
+        "persist-credentials: false",
         "run: make verify",
         "actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d",
         "actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9",
         "actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128",
+        "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a",
+        "actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c",
+        "artifact-ids: ${{ needs.build.outputs.gitbook-artifact-id }}",
+        "include-hidden-files: true",
+        "SHA256SUMS",
+        "REVIEWED_SHA",
         "pages: write",
         "id-token: write",
         "environment:",
@@ -169,6 +219,55 @@ def check_workflows() -> None:
             fail(f"publish workflow is missing: {fragment}")
     if "--force" in workflow or "push --force" in workflow:
         fail("publish workflow must not force-push the GitBook branch")
+    for reference in re.findall(r"(?m)^\s*uses:\s*[^\s@]+@([^\s#]+)", workflow):
+        if re.fullmatch(r"[0-9a-f]{40}", reference) is None:
+            fail(f"publish workflow action is not pinned to an exact commit: {reference}")
+
+    build_job = workflow_job(workflow, "build")
+    sync_job = workflow_job(workflow, "sync-gitbook")
+    require_job_fragments(
+        "build",
+        build_job,
+        (
+            "permissions:\n      contents: read",
+            "persist-credentials: false",
+            "id: upload-gitbook",
+            "gitbook-artifact-id:",
+            "artifact-digest:",
+        ),
+    )
+    require_job_fragments(
+        "sync-gitbook",
+        sync_job,
+        (
+            "permissions:\n      contents: write",
+            "needs: build",
+            "actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c",
+            "artifact-ids: ${{ needs.build.outputs.gitbook-artifact-id }}",
+            "git rm -r --ignore-unmatch -- .gitbook.yaml dist\n",
+            "test ! -e dist && test ! -L dist",
+            "git push origin HEAD:gitbook-publish",
+        ),
+    )
+    for forbidden in ("make ", "cargo ", "python", "scripts/", "git merge"):
+        if forbidden in sync_job:
+            fail(f"write-scoped GitBook job executes forbidden branch content: {forbidden.strip()}")
+
+
+def workflow_job(workflow: str, job_name: str) -> str:
+    match = re.search(
+        rf"(?ms)^  {re.escape(job_name)}:\n(?P<body>.*?)(?=^  [a-zA-Z0-9_-]+:\n|\Z)",
+        workflow,
+    )
+    if match is None:
+        fail(f"publish workflow is missing job: {job_name}")
+    return match.group(0)
+
+
+def require_job_fragments(job_name: str, job: str, fragments: tuple[str, ...]) -> None:
+    for fragment in fragments:
+        if fragment not in job:
+            fail(f"publish workflow job {job_name} is missing: {fragment}")
 
 
 def check_reader_links() -> None:
@@ -210,12 +309,21 @@ def check_artifacts() -> None:
                 fail(f"generated reader artifact must not be a symlink: {path}")
     for relative in (
         "dist/html/index.html",
+        "dist/html/_delivery/book-license.html",
         "dist/gitbook/.gitbook.yaml",
         "dist/gitbook/README.md",
         "dist/gitbook/SUMMARY.md",
+        "dist/gitbook/_delivery/book-license.md",
     ):
         if not (ROOT / relative).is_file():
             fail(f"missing generated reader artifact: {relative}")
+    html_parser = VisibleTextParser()
+    html_parser.feed(read("dist/html/_delivery/book-license.html"))
+    require_complete_book_licence("generated HTML licence page", " ".join(html_parser.fragments))
+    require_complete_book_licence(
+        "generated GitBook licence page",
+        read("dist/gitbook/_delivery/book-license.md"),
+    )
     gitbook_root = ROOT / "dist/gitbook"
     gitbook_readme = (gitbook_root / "README.md").read_text(encoding="utf-8")
     if PAGES_URL not in gitbook_readme or "我们先把目标说清楚" not in gitbook_readme:
@@ -268,6 +376,8 @@ def check_artifacts() -> None:
                 if path.is_absolute() or ".." in path.parts or not name.startswith(root):
                     fail(f"generated {chapter} archive has an unsafe path: {name}")
                 mode = entry.external_attr >> 16
+                if entry.create_system != 3:
+                    fail(f"generated {chapter} archive creator system is not Unix: {name}")
                 if mode != 0o100644 or entry.compress_type != zipfile.ZIP_STORED:
                     fail(f"generated {chapter} archive entry metadata is unstable: {name}")
                 if entry.date_time != (1980, 1, 1, 0, 0, 0):
@@ -278,13 +388,38 @@ def check_artifacts() -> None:
             fail(f"generated {chapter} HTML page does not link to its archive")
 
 
+def check_pdf_artifacts() -> None:
+    typst_path = ROOT / "dist/typst/book.typ"
+    pdf_path = ROOT / "dist/rust-harness-book.pdf"
+    if not typst_path.is_file() or not pdf_path.is_file():
+        fail("missing generated Typst source or compiled PDF")
+    licence = read("LICENSE-BOOK").rstrip("\n")
+    if typst_string(licence) not in typst_path.read_text(encoding="utf-8"):
+        fail("generated Typst source does not contain the complete LICENSE-BOOK notice")
+    extractor = shutil.which("pdftotext")
+    if extractor is None:
+        fail("pdftotext is required for compiled PDF licence verification")
+    result = subprocess.run(
+        [extractor, str(pdf_path), "-"],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        fail(f"pdftotext could not read the compiled PDF: {result.stderr.strip()}")
+    require_complete_book_licence("compiled PDF", result.stdout)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--artifacts", action="store_true")
+    parser.add_argument("--pdf-artifacts", action="store_true")
     arguments = parser.parse_args()
     check_static_contract()
     if arguments.artifacts:
         check_artifacts()
+    if arguments.pdf_artifacts:
+        check_pdf_artifacts()
     print("reader-delivery checks passed")
 
 

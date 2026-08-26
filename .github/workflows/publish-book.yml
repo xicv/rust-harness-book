@@ -20,12 +20,17 @@ jobs:
     timeout-minutes: 30
     permissions:
       contents: read
+    outputs:
+      gitbook-artifact-id: ${{ steps.upload-gitbook.outputs.artifact-id }}
+      gitbook-artifact-digest: ${{ steps.upload-gitbook.outputs.artifact-digest }}
 
     steps:
       - name: Check out complete repository history
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
+          persist-credentials: false
+          ref: ${{ github.sha }}
 
       - name: Install Rust 1.98.0
         uses: dtolnay/rust-toolchain@6c977a6ca4077a0ceb28ffbe03f59d46e9ac8772
@@ -55,10 +60,40 @@ jobs:
       - name: Install CJK fonts for the PDF build
         run: |
           sudo apt-get update
-          sudo apt-get install --yes fonts-noto-cjk
+          sudo apt-get install --yes fonts-noto-cjk poppler-utils
 
       - name: Verify the exact publication candidate
         run: make verify
+
+      - name: Verify compiled PDF carries the book licence
+        run: python3 scripts/check_reader_delivery.py --pdf-artifacts
+
+      - name: Prepare inert GitBook publication data
+        env:
+          ARTIFACT_ROOT: ${{ runner.temp }}/gitbook-publication
+          REVIEWED_SHA: ${{ github.sha }}
+        run: |
+          mkdir -p "$ARTIFACT_ROOT/dist"
+          cp .gitbook.yaml "$ARTIFACT_ROOT/.gitbook.yaml"
+          cp -R dist/gitbook "$ARTIFACT_ROOT/dist/gitbook"
+          printf '%s\n' "$REVIEWED_SHA" > "$ARTIFACT_ROOT/REVIEWED_SHA"
+          (
+            cd "$ARTIFACT_ROOT"
+            find . -type f -print0 \
+              | LC_ALL=C sort -z \
+              | xargs -0 sha256sum > "${ARTIFACT_ROOT}.SHA256SUMS"
+          )
+          mv "${ARTIFACT_ROOT}.SHA256SUMS" "$ARTIFACT_ROOT/SHA256SUMS"
+
+      - name: Upload verified GitBook publication data
+        id: upload-gitbook
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: gitbook-publication-${{ github.sha }}
+          path: ${{ runner.temp }}/gitbook-publication
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 7
 
       - name: Configure GitHub Pages
         if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
@@ -91,7 +126,7 @@ jobs:
 
   sync-gitbook:
     name: Update generated GitBook branch
-    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: build
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -99,37 +134,59 @@ jobs:
       contents: write
 
     steps:
-      - name: Check out complete repository history
+      - name: Download exact verified GitBook artifact
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          artifact-ids: ${{ needs.build.outputs.gitbook-artifact-id }}
+          path: ${{ runner.temp }}/gitbook-artifact
+          digest-mismatch: error
+
+      - name: Verify inert artifact provenance and checksums
+        env:
+          ARTIFACT_ROOT: ${{ runner.temp }}/gitbook-artifact
+          EXPECTED_ARTIFACT_DIGEST: ${{ needs.build.outputs.gitbook-artifact-digest }}
+          REVIEWED_SHA: ${{ github.sha }}
+        run: |
+          test "$(cat "$ARTIFACT_ROOT/REVIEWED_SHA")" = "$REVIEWED_SHA"
+          test "${#EXPECTED_ARTIFACT_DIGEST}" -eq 64
+          test -f "$ARTIFACT_ROOT/.gitbook.yaml"
+          test ! -L "$ARTIFACT_ROOT/.gitbook.yaml"
+          test -z "$(find "$ARTIFACT_ROOT" -type l -print -quit)"
+          test -z "$(find "$ARTIFACT_ROOT" -mindepth 1 -maxdepth 1 \
+            ! -name .gitbook.yaml ! -name dist ! -name REVIEWED_SHA \
+            ! -name SHA256SUMS -print -quit)"
+          (
+            cd "$ARTIFACT_ROOT"
+            sha256sum --check SHA256SUMS
+          )
+
+      - name: Check out trusted transport repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          fetch-depth: 0
+          fetch-depth: 1
+          path: publication-repository
+          ref: ${{ github.sha }}
 
-      - name: Install Rust 1.98.0
-        uses: dtolnay/rust-toolchain@6c977a6ca4077a0ceb28ffbe03f59d46e9ac8772
-        with:
-          toolchain: 1.98.0
-
-      - name: Prepare non-force publication branch
+      - name: Replace publication data and push without force
         env:
+          ARTIFACT_ROOT: ${{ runner.temp }}/gitbook-artifact
           REVIEWED_SHA: ${{ github.sha }}
         run: |
-          if git ls-remote --exit-code --heads origin refs/heads/gitbook-publish; then
-            git fetch origin gitbook-publish
-            git switch --create gitbook-publish --track origin/gitbook-publish
-            git merge --no-edit "$REVIEWED_SHA"
-          else
-            git switch --create gitbook-publish "$REVIEWED_SHA"
-          fi
-
-      - name: Regenerate GitBook Markdown from canonical sources
-        run: make gitbook-export
-
-      - name: Commit and push generated mirror without force
-        env:
-          REVIEWED_SHA: ${{ github.sha }}
-        run: |
+          cd publication-repository
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git ls-remote --exit-code --heads origin refs/heads/gitbook-publish; then
+            git fetch --no-tags origin refs/heads/gitbook-publish
+            git switch --detach FETCH_HEAD
+          else
+            git switch --orphan gitbook-publish
+            git rm -r --ignore-unmatch -- .
+          fi
+          git rm -r --ignore-unmatch -- .gitbook.yaml dist
+          test ! -e dist && test ! -L dist
+          mkdir dist
+          cp "$ARTIFACT_ROOT/.gitbook.yaml" .gitbook.yaml
+          cp -R "$ARTIFACT_ROOT/dist/gitbook" dist/gitbook
           git add .gitbook.yaml
           git add -A -f dist/gitbook
           if ! git diff --cached --quiet; then
