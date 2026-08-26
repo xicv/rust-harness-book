@@ -66,9 +66,7 @@ struct GitBookEnvironment<'a> {
 ///
 /// Returns an error when any canonical source, include, link, asset, or output
 /// path violates the book renderer contract.
-pub fn export_gitbook(
-    request: &GitBookExportRequest,
-) -> Result<GitBookExportReport, RenderError> {
+pub fn export_gitbook(request: &GitBookExportRequest) -> Result<GitBookExportReport, RenderError> {
     let book_dir = canonical_existing(request.book_dir(), "book directory")?;
     let project_root = book_dir
         .parent()
@@ -90,25 +88,24 @@ pub fn export_gitbook(
     assign_chapter_labels(&mut entries);
     let chapter_outputs = gitbook_chapter_outputs(&entries, &source_dir)?;
 
-    let output_dir = safe_output_directory(request.output_dir(), &project_root)?;
+    let git_control_path = project_root.join(".git");
+    let typst_template_path = project_root.join("typst/template.typ");
+    let protected_paths = [
+        (book_dir.as_path(), "book directory"),
+        (source_dir.as_path(), "book source directory"),
+        (typst_template_path.as_path(), "Typst template"),
+        (git_control_path.as_path(), "Git control path"),
+    ];
+    let output_dir = safe_output_directory(request.output_dir(), &project_root, &protected_paths)?;
     let staging_dir = sibling_work_path(&output_dir, "gitbook-staging");
     let backup_dir = sibling_work_path(&output_dir, "gitbook-backup");
     remove_if_exists(&staging_dir, "stale GitBook staging directory")?;
     remove_if_exists(&backup_dir, "stale GitBook backup directory")?;
-    fs::create_dir_all(staging_dir.join("assets")).map_err(|error| {
-        io_context(
-            "create GitBook staging directory",
-            &staging_dir,
-            error,
-        )
-    })?;
+    fs::create_dir_all(staging_dir.join("assets"))
+        .map_err(|error| io_context("create GitBook staging directory", &staging_dir, error))?;
 
-    let result = export_gitbook_into_staging(
-        &entries,
-        &chapter_outputs,
-        &project_root,
-        &staging_dir,
-    );
+    let result =
+        export_gitbook_into_staging(&entries, &chapter_outputs, &project_root, &staging_dir);
     let asset_count = match result {
         Ok(count) => count,
         Err(error) => {
@@ -205,9 +202,8 @@ fn export_gitbook_into_staging(
         let markdown = render_gitbook_blocks(&blocks, &mut environment)?;
         let destination = staging_dir.join(output_path);
         if let Some(parent) = destination.parent() {
-            fs::create_dir_all(parent).map_err(|error| {
-                io_context("create GitBook chapter directory", parent, error)
-            })?;
+            fs::create_dir_all(parent)
+                .map_err(|error| io_context("create GitBook chapter directory", parent, error))?;
         }
         fs::write(&destination, markdown)
             .map_err(|error| io_context("write GitBook chapter", &destination, error))?;
@@ -276,7 +272,7 @@ fn render_gitbook_block(
             render_gitbook_inlines(content, environment)?
         )),
         Block::Code { language, source } => {
-            let fence = markdown_fence(source);
+            let fence = markdown_fence(source, language);
             Ok(format!("{fence}{language}\n{source}\n{fence}\n"))
         }
         Block::BulletList(items) => render_gitbook_list(items, None, environment),
@@ -476,7 +472,10 @@ fn resolve_gitbook_link(
     Ok(linked_path)
 }
 
-fn relative_markdown_path(from_directory: &Path, destination: &Path) -> Result<String, RenderError> {
+fn relative_markdown_path(
+    from_directory: &Path,
+    destination: &Path,
+) -> Result<String, RenderError> {
     let from = from_directory.components().collect::<Vec<_>>();
     let to = destination.components().collect::<Vec<_>>();
     let common = from
@@ -532,13 +531,14 @@ fn prefix_markdown_lines(source: &str, prefix: &str) -> String {
     output
 }
 
-fn markdown_fence(source: &str) -> String {
+fn markdown_fence(source: &str, info: &str) -> String {
+    let marker = if info.contains('`') { '~' } else { '`' };
     let longest = source
-        .split(|character| character != '`')
+        .split(|character| character != marker)
         .map(str::len)
         .max()
         .unwrap_or(0);
-    "`".repeat(longest.saturating_add(1).max(3))
+    marker.to_string().repeat(longest.saturating_add(1).max(3))
 }
 
 fn markdown_inline_code(value: &str) -> String {

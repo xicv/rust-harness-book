@@ -293,7 +293,14 @@ pub fn render(request: &RenderRequest) -> Result<RenderReport, RenderError> {
     assign_chapter_labels(&mut entries);
     let chapter_labels = chapter_label_map(&entries);
 
-    let output_dir = safe_output_directory(request.output_dir(), &project_root)?;
+    let git_control_path = project_root.join(".git");
+    let protected_paths = [
+        (book_dir.as_path(), "book directory"),
+        (source_dir.as_path(), "book source directory"),
+        (template_path.as_path(), "Typst template"),
+        (git_control_path.as_path(), "Git control path"),
+    ];
+    let output_dir = safe_output_directory(request.output_dir(), &project_root, &protected_paths)?;
     let staging_dir = sibling_work_path(&output_dir, "staging");
     let backup_dir = sibling_work_path(&output_dir, "backup");
     remove_if_exists(&staging_dir, "stale renderer staging directory")?;
