@@ -41,15 +41,21 @@ licence and attribution are recorded.
 
 ## Current repository rights status
 
-No project-wide reuse licence is granted by this scaffold. Public repository
-access must not be described as permission to copy, modify, or redistribute the
-book or code. The author must choose and document licences before a public
-release intended for reuse.
+The original software and source code are available under the MIT License in
+the repository-root `LICENSE` file.
+
+The original book prose and diagrams are separately available under the MIT
+License in the repository-root `LICENSE-BOOK` file. Keeping the scopes separate
+makes it clear which licence travels with a code-only chapter pack.
+
+Third-party excerpts, assets, fonts, and source snapshots retain their own
+licences and attribution requirements. Neither project licence overrides those
+terms.
 
 ## Publication gate
 
-Choose and document separate licences for:
+Before publication, confirm that the release records separate rights for:
 
-- original book prose and diagrams;
-- original source code;
+- original book prose and diagrams (`LICENSE-BOOK`);
+- original source code (`LICENSE`);
 - third-party excerpts and assets.

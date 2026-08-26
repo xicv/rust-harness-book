@@ -1,0 +1,195 @@
+name: Publish reader editions
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-reader-editions
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build and verify reader editions
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    outputs:
+      gitbook-artifact-id: ${{ steps.upload-gitbook.outputs.artifact-id }}
+      gitbook-artifact-digest: ${{ steps.upload-gitbook.outputs.artifact-digest }}
+
+    steps:
+      - name: Check out complete repository history
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          ref: ${{ github.sha }}
+
+      - name: Install Rust 1.98.0
+        uses: dtolnay/rust-toolchain@6c977a6ca4077a0ceb28ffbe03f59d46e9ac8772
+        with:
+          toolchain: 1.98.0
+          components: clippy,rustfmt
+
+      - name: Install mdBook 0.5.4
+        env:
+          MDBOOK_VERSION: "0.5.4"
+          MDBOOK_SHA256: "3f28de05dafca9d0f2eab99c662116b0e37b89b1d96a08f8f430b9eeae958cd7"
+        run: |
+          mkdir -p "$RUNNER_TEMP/mdbook"
+          curl --fail --location --silent --show-error \
+            "https://github.com/rust-lang/mdBook/releases/download/v${MDBOOK_VERSION}/mdbook-v${MDBOOK_VERSION}-x86_64-unknown-linux-gnu.tar.gz" \
+            --output "$RUNNER_TEMP/mdbook.tar.gz"
+          echo "${MDBOOK_SHA256}  $RUNNER_TEMP/mdbook.tar.gz" | sha256sum --check
+          tar -xzf "$RUNNER_TEMP/mdbook.tar.gz" --directory "$RUNNER_TEMP/mdbook"
+          echo "$RUNNER_TEMP/mdbook" >> "$GITHUB_PATH"
+          "$RUNNER_TEMP/mdbook/mdbook" --version
+
+      - name: Install Typst 0.15.1
+        uses: typst-community/setup-typst@48aeee7543d37f01afd1ffb27307dc277387ba13 # v4 built action
+        with:
+          typst-version: "0.15.1"
+
+      - name: Install CJK fonts for the PDF build
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes fonts-noto-cjk poppler-utils
+
+      - name: Verify the exact publication candidate
+        run: make verify
+
+      - name: Verify compiled PDF carries the book licence
+        run: python3 scripts/check_reader_delivery.py --pdf-artifacts
+
+      - name: Prepare inert GitBook publication data
+        env:
+          ARTIFACT_ROOT: ${{ runner.temp }}/gitbook-publication
+          REVIEWED_SHA: ${{ github.sha }}
+        run: |
+          mkdir -p "$ARTIFACT_ROOT/dist"
+          cp .gitbook.yaml "$ARTIFACT_ROOT/.gitbook.yaml"
+          cp -R dist/gitbook "$ARTIFACT_ROOT/dist/gitbook"
+          printf '%s\n' "$REVIEWED_SHA" > "$ARTIFACT_ROOT/REVIEWED_SHA"
+          (
+            cd "$ARTIFACT_ROOT"
+            find . -type f -print0 \
+              | LC_ALL=C sort -z \
+              | xargs -0 sha256sum > "${ARTIFACT_ROOT}.SHA256SUMS"
+          )
+          mv "${ARTIFACT_ROOT}.SHA256SUMS" "$ARTIFACT_ROOT/SHA256SUMS"
+
+      - name: Upload verified GitBook publication data
+        id: upload-gitbook
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: gitbook-publication-${{ github.sha }}
+          path: ${{ runner.temp }}/gitbook-publication
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 7
+
+      - name: Configure GitHub Pages
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+
+      - name: Upload GitHub Pages artifact
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: dist/html
+
+  deploy-pages:
+    name: Deploy GitHub Pages
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy exact verified artifact
+        id: deployment
+        uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5.0.0
+
+  sync-gitbook:
+    name: Update generated GitBook branch
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download exact verified GitBook artifact
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          artifact-ids: ${{ needs.build.outputs.gitbook-artifact-id }}
+          path: ${{ runner.temp }}/gitbook-artifact
+          digest-mismatch: error
+
+      - name: Verify inert artifact provenance and checksums
+        env:
+          ARTIFACT_ROOT: ${{ runner.temp }}/gitbook-artifact
+          EXPECTED_ARTIFACT_DIGEST: ${{ needs.build.outputs.gitbook-artifact-digest }}
+          REVIEWED_SHA: ${{ github.sha }}
+        run: |
+          test "$(cat "$ARTIFACT_ROOT/REVIEWED_SHA")" = "$REVIEWED_SHA"
+          test "${#EXPECTED_ARTIFACT_DIGEST}" -eq 64
+          test -f "$ARTIFACT_ROOT/.gitbook.yaml"
+          test ! -L "$ARTIFACT_ROOT/.gitbook.yaml"
+          test -z "$(find "$ARTIFACT_ROOT" -type l -print -quit)"
+          test -z "$(find "$ARTIFACT_ROOT" -mindepth 1 -maxdepth 1 \
+            ! -name .gitbook.yaml ! -name dist ! -name REVIEWED_SHA \
+            ! -name SHA256SUMS -print -quit)"
+          (
+            cd "$ARTIFACT_ROOT"
+            sha256sum --check SHA256SUMS
+          )
+
+      - name: Check out trusted transport repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 1
+          path: publication-repository
+          ref: ${{ github.sha }}
+
+      - name: Replace publication data and push without force
+        env:
+          ARTIFACT_ROOT: ${{ runner.temp }}/gitbook-artifact
+          REVIEWED_SHA: ${{ github.sha }}
+        run: |
+          cd publication-repository
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git ls-remote --exit-code --heads origin refs/heads/gitbook-publish; then
+            git fetch --no-tags origin refs/heads/gitbook-publish
+            git switch --detach FETCH_HEAD
+          else
+            git switch --orphan gitbook-publish
+            git rm -r --ignore-unmatch -- .
+          fi
+          git rm -r --ignore-unmatch -- .gitbook.yaml dist
+          test ! -e dist && test ! -L dist
+          mkdir dist
+          cp "$ARTIFACT_ROOT/.gitbook.yaml" .gitbook.yaml
+          cp -R "$ARTIFACT_ROOT/dist/gitbook" dist/gitbook
+          git add .gitbook.yaml
+          git add -A -f dist/gitbook
+          if ! git diff --cached --quiet; then
+            git commit -m "docs(gitbook): sync ${REVIEWED_SHA}"
+          fi
+          git push origin HEAD:gitbook-publish

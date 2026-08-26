@@ -1,0 +1,5 @@
+thread/started thread=thread-1
+turn/started thread=thread-1 turn=turn-1
+item/completed thread=thread-1 turn=turn-1 item=item-1 role=user text="hello"
+item/completed thread=thread-1 turn=turn-1 item=item-2 role=assistant text="Echo: hello"
+turn/completed thread=thread-1 turn=turn-1

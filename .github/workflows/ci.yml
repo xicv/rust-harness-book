@@ -21,6 +21,9 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
 
       - name: Install Rust 1.98.0
         uses: dtolnay/rust-toolchain@6c977a6ca4077a0ceb28ffbe03f59d46e9ac8772
@@ -50,7 +53,7 @@ jobs:
       - name: Install CJK fonts for the PDF build
         run: |
           sudo apt-get update
-          sudo apt-get install --yes fonts-noto-cjk
+          sudo apt-get install --yes fonts-noto-cjk poppler-utils
 
       - name: Validate scaffold metadata and links
         run: make scaffold-check
@@ -70,8 +73,11 @@ jobs:
       - name: Test book Rust examples
         run: make book-test
 
-      - name: Build HTML book
-        run: make book-build
+      - name: Build and verify reader editions
+        run: make reader-delivery
 
       - name: Render canonical Markdown and build full PDF
         run: make pdf
+
+      - name: Verify compiled PDF carries the book licence
+        run: python3 scripts/check_reader_delivery.py --pdf-artifacts

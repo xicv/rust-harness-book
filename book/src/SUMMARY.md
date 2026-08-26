@@ -56,3 +56,11 @@
 - [实时模型与评测 / Live Provider and Evaluations](08-hardening/34-live-provider-and-evals.md)
 - [MCP 与扩展 / MCP and Extensions](08-hardening/35-mcp-and-extensions.md)
 - [加固与发布 / Hardening and Release](08-hardening/36-release-evidence.md)
+
+---
+
+# Reader resources / 读者资源
+- [章节代码包 / Chapter code packs](_delivery/chapter-code.md)
+  - [第 0 章代码包 / Chapter 0 code pack](_delivery/ch00.md)
+  - [第 1 章代码包 / Chapter 1 code pack](_delivery/ch01.md)
+- [Book license / 本书许可](_delivery/book-license.md)

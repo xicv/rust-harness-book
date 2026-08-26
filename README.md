@@ -34,6 +34,13 @@ educational agent harness built throughout it.
 - `book-render` now converts the same canonical Markdown into generated Typst,
   and Typst compiles the full PDF. Completed Chapters 0 and 1 therefore have
   HTML/PDF content parity.
+- The reader-delivery pipeline builds verified Chapter 0 and Chapter 1 code
+  packs and a generated GitBook-compatible Markdown mirror. These local
+  artifacts are verified; hosted Pages and GitBook availability remain separate
+  post-merge checks.
+- Every standalone reader edition carries the complete original-book MIT notice
+  from the repository-root `LICENSE-BOOK`; the canonical book page includes that
+  file rather than copying it.
 
 Start here:
 
@@ -70,6 +77,17 @@ mdbook build book
 make pdf
 ```
 
+Build every reader-delivery artifact with:
+
+```sh
+make reader-delivery
+```
+
+That command builds `dist/html/`, reconstructs and verifies the Chapter 0 and
+Chapter 1 ZIPs under `dist/html/downloads/`, and generates `dist/gitbook/` from
+the same strict Markdown parser used by the PDF renderer. Chapter packs require
+the pinned historical commits, so a shallow Git clone fails closed.
+
 The PDF path is:
 
 ```text
@@ -78,6 +96,22 @@ dist/rust-harness-book.pdf
 
 The generated Typst project lives under `dist/typst/`. It is build output and
 must not be edited or committed. `book/src/` remains the only prose source.
+
+## Reader editions / 读者版本
+
+The configured authoritative interactive URL is
+[GitHub Pages](https://xicv.github.io/rust-harness-book/). The repository must
+first be configured to use GitHub Actions as its Pages source, and a successful
+deployment must be visited before the URL is described as live.
+
+GitBook is a secondary renderer. The workflow regenerates `dist/gitbook/` only
+from verified `main` in a read-only job, uploads the checked inert output, and
+updates `gitbook-publish` in a separate write-scoped transport job without
+executing publication-branch code or force-pushing.
+Connecting that branch to a GitBook space, choosing the project directory, and
+publishing the space remain manual account-side steps. GitBook does not provide
+the mdBook inline Playground experience; its generated Introduction links back
+to the interactive edition.
 
 ## Local verification / 本地验证
 
@@ -88,7 +122,7 @@ make check
 make test
 make lint
 make book-test
-make book-build
+make reader-delivery
 make pdf
 ```
 
@@ -114,5 +148,7 @@ remote images instead of silently producing incomplete output.
 The current harness does not claim real model intelligence, tools, streaming,
 persistence, Codex compatibility, or production sandbox security.
 
-No project-wide reuse licence has been selected. See
+Original software and source code use the [MIT code licence](LICENSE). Original
+book prose and diagrams use the separate [MIT book licence](LICENSE-BOOK).
+Third-party material retains its own terms; see
 `docs/08-SOURCE-AND-RIGHTS-POLICY.md` before reusing material.

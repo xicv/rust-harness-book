@@ -67,7 +67,7 @@ examples: [ch00-domain-types, ch00-run-turn, ch00-ordered-events, ch00-blank-pro
 
 Harness 负责把模型放进一个可以工作的系统里。
 
-可以把模型想成一台很有能力的发动机。发动机很重要，但一辆可以安全驾驶的车还需要方向、刹车、仪表、车身和规则。Agent Harness 就是模型周围那套运行系统。
+模型像一台很有能力的发动机。发动机很重要，但一辆可以安全驾驶的车还需要方向、刹车、仪表、车身和规则。Agent Harness 就是模型周围那套运行系统。
 
 这只是帮助理解的类比，不是严格定义。真正的关键是：
 
@@ -724,4 +724,8 @@ Agent Harness
 
 下一章，我们暂时不增加新的 Agent 功能。
 
-我们会先把开发环境变成可复查的证据：为什么同一份代码在不同机器上可能得到不同结果，以及 Rust toolchain、Edition、MSRV、Workspace 和 Lockfile 分别在控制什么。
+下一章先把开发环境变成可复查的证据：为什么同一份代码在不同机器上可能得到不同结果，以及 Rust toolchain、Edition、MSRV、Workspace 和 Lockfile 分别在控制什么。
+
+想单独保存或修改本章结束时的完整项目，可以使用
+[第 0 章代码包 / Chapter 0 code pack](../_delivery/ch00.md)。下载页记录固定源
+commit、校验值和从干净目录开始的验证步骤。

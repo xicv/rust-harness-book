@@ -1,0 +1,23 @@
+schema = 1
+
+[github_pages]
+repository = "xicv/rust-harness-book"
+url = "https://xicv.github.io/rust-harness-book/"
+base_path = "/rust-harness-book/"
+source = "GitHub Actions"
+
+[gitbook]
+branch = "gitbook-publish"
+root = "dist/gitbook"
+sync_direction = "bidirectional"
+generated = true
+
+[[chapter_pack]]
+chapter = "ch00"
+source_commit = "3fed46defa0189e4e1a8f5b7dc3ab61743209b08"
+archive = "downloads/ch00/rust-harness-ch00.zip"
+
+[[chapter_pack]]
+chapter = "ch01"
+source_commit = "decef67c89afba8e4eb095b0c16454e4aca97eb5"
+archive = "downloads/ch01/rust-harness-ch01.zip"
