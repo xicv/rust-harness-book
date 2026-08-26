@@ -67,10 +67,33 @@ def normalize_text(source: str) -> str:
     return " ".join(source.split())
 
 
+def remove_pdf_page_number_footers(source: str) -> str:
+    pages: list[str] = []
+    for page in source.split("\f"):
+        lines = page.splitlines()
+        while lines and not lines[-1].strip():
+            lines.pop()
+        if lines and re.fullmatch(r"[0-9]+", lines[-1].strip()):
+            lines.pop()
+        pages.append("\n".join(lines))
+    return "\n".join(pages)
+
+
 def require_complete_book_licence(label: str, source: str) -> None:
     licence = normalize_text(read("LICENSE-BOOK"))
     if licence not in normalize_text(source):
         fail(f"{label} does not contain the complete LICENSE-BOOK notice")
+
+
+def check_pdf_footer_normalization() -> None:
+    licence = read("LICENSE-BOOK")
+    final_sentence = "OTHER DEALINGS IN THE\nSOFTWARE."
+    prefix, suffix = licence.split(final_sentence, maxsplit=1)
+    extracted = f"{prefix.rstrip()}\n104\n\f{final_sentence}{suffix}"
+    require_complete_book_licence(
+        "page-spanning PDF licence fixture",
+        remove_pdf_page_number_footers(extracted),
+    )
 
 
 def typst_string(value: str) -> str:
@@ -294,6 +317,7 @@ def check_reader_links() -> None:
 
 
 def check_static_contract() -> None:
+    check_pdf_footer_normalization()
     check_licences()
     check_pack_contract()
     check_publication_config()
@@ -407,7 +431,10 @@ def check_pdf_artifacts() -> None:
     )
     if result.returncode != 0:
         fail(f"pdftotext could not read the compiled PDF: {result.stderr.strip()}")
-    require_complete_book_licence("compiled PDF", result.stdout)
+    require_complete_book_licence(
+        "compiled PDF",
+        remove_pdf_page_number_footers(result.stdout),
+    )
 
 
 def main() -> None:
