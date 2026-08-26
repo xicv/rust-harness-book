@@ -13,9 +13,10 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 use sha2::{Digest, Sha256};
 use toml::Value;
 use zip::write::SimpleFileOptions;
-use zip::{CompressionMethod, ZipArchive, ZipWriter};
+use zip::{CompressionMethod, System, ZipArchive, ZipWriter};
 
 static NEXT_VERIFICATION_DIRECTORY: AtomicUsize = AtomicUsize::new(0);
+static NEXT_STAGING_DIRECTORY: AtomicUsize = AtomicUsize::new(0);
 
 #[derive(Debug, Clone)]
 pub struct BuildRequest {
@@ -103,16 +104,31 @@ pub fn build_and_verify(request: &BuildRequest) -> Result<BuildReport, PackError
     fs::create_dir_all(&request.output_directory)
         .map_err(|error| PackError::with_context("could not create output directory", error))?;
     let output_directory = canonical_directory(&request.output_directory, "output directory")?;
-    let archive_path = output_directory.join(&manifest.archive_name);
-    write_archive(&archive_path, &manifest.root_directory, &files)?;
+    let staging_directory = StagingDirectory::new(&output_directory)?;
+    let staged_archive = staging_directory.path().join(&manifest.archive_name);
+    write_archive(&staged_archive, &manifest.root_directory, &files)?;
 
-    let archive_bytes = fs::read(&archive_path)
+    let archive_bytes = fs::read(&staged_archive)
         .map_err(|error| PackError::with_context("could not read generated archive", error))?;
-    let checksum_path = output_directory.join(format!("{}.sha256", manifest.archive_name));
-    fs::write(&checksum_path, format!("{}\n", sha256_hex(&archive_bytes)))
-        .map_err(|error| PackError::with_context("could not write archive checksum", error))?;
+    let checksum_name = format!("{}.sha256", manifest.archive_name);
+    let staged_checksum = staging_directory.path().join(&checksum_name);
+    fs::write(
+        &staged_checksum,
+        format!("{}\n", sha256_hex(&archive_bytes)),
+    )
+    .map_err(|error| PackError::with_context("could not write archive checksum", error))?;
 
-    verify_archive(&archive_path, &manifest, &files, &output_directory)?;
+    verify_archive(&staged_archive, &manifest, &files, staging_directory.path())?;
+
+    let archive_path = output_directory.join(&manifest.archive_name);
+    let checksum_path = output_directory.join(checksum_name);
+    publish_artifacts(
+        &staged_archive,
+        &staged_checksum,
+        &archive_path,
+        &checksum_path,
+        staging_directory.path(),
+    )?;
 
     Ok(BuildReport {
         archive_path,
@@ -434,8 +450,9 @@ fn write_archive(
     let file = File::create(archive_path)
         .map_err(|error| PackError::with_context("could not create archive", error))?;
     let mut writer = ZipWriter::new(file);
-    let options = SimpleFileOptions::default()
+    let options = SimpleFileOptions::DEFAULT
         .compression_method(CompressionMethod::Stored)
+        .system(System::Unix)
         .unix_permissions(0o644);
     for (path, bytes) in files {
         writer
@@ -449,6 +466,67 @@ fn write_archive(
         .finish()
         .map_err(|error| PackError::with_context("could not finish archive", error))?;
     Ok(())
+}
+
+fn publish_artifacts(
+    staged_archive: &Path,
+    staged_checksum: &Path,
+    archive_path: &Path,
+    checksum_path: &Path,
+    staging_directory: &Path,
+) -> Result<(), PackError> {
+    let previous_archive = staging_directory.join("previous-archive");
+    let previous_checksum = staging_directory.join("previous-checksum");
+    let had_archive = move_existing(archive_path, &previous_archive)?;
+    let had_checksum = match move_existing(checksum_path, &previous_checksum) {
+        Ok(value) => value,
+        Err(error) => {
+            restore_previous(&previous_archive, archive_path, had_archive);
+            return Err(error);
+        }
+    };
+
+    if let Err(error) = fs::rename(staged_archive, archive_path) {
+        restore_previous(&previous_archive, archive_path, had_archive);
+        restore_previous(&previous_checksum, checksum_path, had_checksum);
+        return Err(PackError::with_context(
+            "could not publish verified archive",
+            error,
+        ));
+    }
+    if let Err(error) = fs::rename(staged_checksum, checksum_path) {
+        let _ = fs::remove_file(archive_path);
+        restore_previous(&previous_archive, archive_path, had_archive);
+        restore_previous(&previous_checksum, checksum_path, had_checksum);
+        return Err(PackError::with_context(
+            "could not publish verified archive checksum",
+            error,
+        ));
+    }
+    Ok(())
+}
+
+fn move_existing(path: &Path, backup: &Path) -> Result<bool, PackError> {
+    if !path.exists() {
+        return Ok(false);
+    }
+    let metadata = fs::symlink_metadata(path)
+        .map_err(|error| PackError::with_context("could not inspect prior artifact", error))?;
+    if metadata.file_type().is_symlink() || !metadata.is_file() {
+        return Err(PackError::new(format!(
+            "existing artifact is not a regular file: {}",
+            path.display()
+        )));
+    }
+    fs::rename(path, backup)
+        .map_err(|error| PackError::with_context("could not preserve prior artifact", error))?;
+    Ok(true)
+}
+
+fn restore_previous(backup: &Path, destination: &Path, existed: bool) {
+    if existed {
+        let _ = fs::rename(backup, destination);
+    }
 }
 
 fn verify_archive(
@@ -560,6 +638,34 @@ fn verify_command(
 
 struct VerificationDirectory {
     path: PathBuf,
+}
+
+struct StagingDirectory {
+    path: PathBuf,
+}
+
+impl StagingDirectory {
+    fn new(parent: &Path) -> Result<Self, PackError> {
+        let sequence = NEXT_STAGING_DIRECTORY.fetch_add(1, Ordering::Relaxed);
+        let path = parent.join(format!(
+            ".chapter-pack-build-{}-{sequence}",
+            std::process::id()
+        ));
+        fs::create_dir(&path).map_err(|error| {
+            PackError::with_context("could not create pack staging directory", error)
+        })?;
+        Ok(Self { path })
+    }
+
+    fn path(&self) -> &Path {
+        &self.path
+    }
+}
+
+impl Drop for StagingDirectory {
+    fn drop(&mut self) {
+        let _ = fs::remove_dir_all(&self.path);
+    }
 }
 
 impl VerificationDirectory {

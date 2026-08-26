@@ -4,23 +4,31 @@ use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicUsize, Ordering};
 
 use chapter_pack::{BuildRequest, build_and_verify};
-use zip::ZipArchive;
+use zip::read::HasZipMetadata;
+use zip::{CompressionMethod, DateTime, System, ZipArchive};
 
 static NEXT_TEMP_DIRECTORY: AtomicUsize = AtomicUsize::new(0);
 
 #[test]
 fn chapter_zero_pack_is_reproducible_and_self_verifying() -> Result<(), Box<dyn Error>> {
     let project_root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
-    let output = TemporaryDirectory::new()?;
-    let request = BuildRequest::new(
+    let first_output = TemporaryDirectory::new()?;
+    let second_output = TemporaryDirectory::new()?;
+    let first_request = BuildRequest::new(
         &project_root,
         project_root.join("chapter-packs/ch00.toml"),
-        output.path(),
+        first_output.path(),
+    );
+    let second_request = BuildRequest::new(
+        &project_root,
+        project_root.join("chapter-packs/ch00.toml"),
+        second_output.path(),
     );
 
-    let first = build_and_verify(&request)?;
+    let first = build_and_verify(&first_request)?;
     let first_bytes = fs::read(first.archive_path())?;
-    let second = build_and_verify(&request)?;
+    let first_checksum = fs::read(first.checksum_path())?;
+    let second = build_and_verify(&second_request)?;
 
     assert_eq!(
         first.source_commit(),
@@ -28,18 +36,54 @@ fn chapter_zero_pack_is_reproducible_and_self_verifying() -> Result<(), Box<dyn 
     );
     assert_eq!(first.verified_command_count(), 2);
     assert_eq!(first_bytes, fs::read(second.archive_path())?);
-    assert_eq!(fs::read_to_string(first.checksum_path())?.len(), 65);
+    assert_eq!(first_checksum, fs::read(second.checksum_path())?);
+    assert_eq!(first_checksum.len(), 65);
 
     let archive_file = fs::File::open(first.archive_path())?;
     let mut archive = ZipArchive::new(archive_file)?;
-    let names = (0..archive.len())
-        .map(|index| archive.by_index(index).map(|file| file.name().to_owned()))
-        .collect::<Result<Vec<_>, _>>()?;
+    let mut names = Vec::new();
+    for index in 0..archive.len() {
+        let file = archive.by_index(index)?;
+        names.push(file.name().to_owned());
+        assert_eq!(file.get_metadata().system, System::Unix);
+        assert_eq!(file.last_modified(), Some(DateTime::DEFAULT));
+        assert_eq!(file.compression(), CompressionMethod::Stored);
+        assert_eq!(file.unix_mode(), Some(0o100644));
+    }
     assert!(names.contains(&"rust-harness-ch00/README.md".to_owned()));
     assert!(names.contains(&"rust-harness-ch00/LICENSE".to_owned()));
     assert!(names.contains(&"rust-harness-ch00/crates/harness-core/src/lib.rs".to_owned()));
     assert!(names.windows(2).all(|pair| pair[0] < pair[1]));
 
+    Ok(())
+}
+
+#[test]
+fn failed_verification_does_not_publish_final_artifacts() -> Result<(), Box<dyn Error>> {
+    let project_root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
+    let output = TemporaryDirectory::new()?;
+    let source_manifest = fs::read_to_string(project_root.join("chapter-packs/ch00.toml"))?;
+    let failing_manifest = source_manifest.replace(
+        "expected_stdout = \"expected-output.txt\"",
+        "expected_stdout = \"README.md\"",
+    );
+    let manifest_path = project_root.join(format!(
+        "target/chapter-pack-failed-verification-test-{}.toml",
+        std::process::id()
+    ));
+    fs::write(&manifest_path, failing_manifest)?;
+    let _manifest_guard = TemporaryFile::new(manifest_path.clone());
+    let request = BuildRequest::new(&project_root, manifest_path, output.path());
+
+    let error = match build_and_verify(&request) {
+        Ok(_) => panic!("mismatched expected output must fail verification"),
+        Err(error) => error,
+    };
+
+    assert!(error.to_string().contains("stdout did not match"));
+    assert!(!output.path().join("rust-harness-ch00.zip").exists());
+    assert!(!output.path().join("rust-harness-ch00.zip.sha256").exists());
+    assert!(fs::read_dir(output.path())?.next().is_none());
     Ok(())
 }
 
